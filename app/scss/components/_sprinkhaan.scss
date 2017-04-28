@@ -4,9 +4,26 @@ $speed: .8s;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
-  pointer-events: none;
+
+  .sprinkhaan-close {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    cursor: pointer;
+    background-color: red;
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    z-index: -1;
+  }
+
+  .sprinkhaan-inner {
+    position: fixed;
+    overflow: hidden;
+    height: 100vh;
+  }
 
   .sprinkhaan-media {
     pointer-events: auto;
@@ -19,21 +36,56 @@ $speed: .8s;
     }
   }
 
-  .sprinkhaan-header {
+  .sprinkhaan-content-wrapper {
     transform: translate(100vh);
     pointer-events: auto;
-    background: rgba(red, .5);
-    height: 50px;
     position: absolute;
     left: 0;
     top: 0;
-    width: 100vw;
+    width: 100%;
+  }
+
+  .sprinkhaan-header {
+    width: 100%;
+  }
+
+  .sprinkhaan-header.is-not-sticky {
     cursor: pointer;
+    position: absolute;
+  }
+
+  .sprinkhaan-header.is-sticky {
+    cursor: pointer;
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
   }
 
   .sprinkhaan-content {
     pointer-events: auto;
-    transform: translate(100vh);
     background: white;
+  }
+}
+
+.sprinkhaan-container[data-state="expanded"] {
+  .sprinkhaan-inner {
+    overflow-y: scroll;
+  }
+
+  .sprinkhaan-close {
+    opacity: 1;
+    z-index: 11;
+  }
+}
+
+.sprinkhaan-container[data-sticky-header="true"] {
+  .sprinkhaan-header.is-sticky {
+    opacity: 1;
+    z-index: 10;
+  }
+
+  .sprinkhaan-header.is-not-sticky {
+    opacity: 0;
+    z-index: -1;
   }
 }

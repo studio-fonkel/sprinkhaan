@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.sprinkhaan-header {
+  padding: 20px;
+  background-color: #ccffcf;
+
+  &.is-sticky {
+    padding-left: 70px;
+    box-shadow: 0 0 10px black;
+  }
+}
+
+.sprinkhaan-content {
+  padding: 20px;
+}
+
+.sprinkhaan-close {
+
+}
