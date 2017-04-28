@@ -45,7 +45,8 @@ SystemJS.config({
     "github:*/*.json"
   ],
   map: {
-    "events": "npm:jspm-nodelibs-events@0.2.0"
+    "events": "npm:jspm-nodelibs-events@0.2.0",
+    "web-animations": "github:web-animations/web-animations-js@2.2.5"
   },
   packages: {}
 });

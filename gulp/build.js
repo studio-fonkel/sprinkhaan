@@ -5,7 +5,7 @@ var exec = require('child_process').exec;
 
 gulp.task('build', ['css'], function () {
 
-    exec('jspm bundle KozijnIsolatie/app dist/build.js --minify', function (err, stdout, stderr) {
+    exec('jspm bundle app/js/app.js dist/build.js --minify', function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
     });

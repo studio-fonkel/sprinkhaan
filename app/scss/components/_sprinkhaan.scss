@@ -1,0 +1,39 @@
+$speed: .8s;
+
+.sprinkhaan-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+
+  .sprinkhaan-media {
+    pointer-events: auto;
+    transform: translate(100vh);
+
+    img {
+      display: block;
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .sprinkhaan-header {
+    transform: translate(100vh);
+    pointer-events: auto;
+    background: rgba(red, .5);
+    height: 50px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    cursor: pointer;
+  }
+
+  .sprinkhaan-content {
+    pointer-events: auto;
+    transform: translate(100vh);
+    background: white;
+  }
+}

@@ -6,6 +6,9 @@
       "baseURL": "app",
       "packages": "app/lib"
     },
+    "dependencies": {
+      "web-animations/web-animations-js": "github:web-animations/web-animations-js@^2.2.5"
+    },
     "devDependencies": {
       "babel-runtime": "npm:babel-runtime@^5.8.24",
       "core-js": "npm:core-js@^1.1.4",
