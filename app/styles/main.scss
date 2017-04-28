@@ -8,7 +8,7 @@ button {
   z-index: 999;
 }
 
-$speed: 1s;
+$speed: .5s;
 
 .sprinkhaan-container {
   position: fixed;
@@ -22,6 +22,10 @@ $speed: 1s;
   background: grey;
 
   .sprinkhaan-media {
+    max-height: 0vh;
+    transition: max-height $speed ease;
+    overflow: hidden;
+
     img {
       display: block;
       width: 100%;
@@ -38,13 +42,13 @@ $speed: 1s;
   }
 
   .sprinkhaan-header {
-    background: pink;
+    background: rgba(red, .5);
     height: 50px;
     transition: all $speed ease;
     transform: translateY(-100%);
-    position: absolute;
-    top: 0;
+    position: relative;
     left: 0;
+    top: 0;
     width: 100%;
   }
 }
@@ -52,15 +56,15 @@ $speed: 1s;
 .sprinkhaan-container[data-state="expanded"] {
   transform: translateY(0);
 
-
   .sprinkhaan-media {
+    max-height: 100vh;
   }
+
   .sprinkhaan-wrapper {
     position: relative;
     transform: translateY(0);
   }
   .sprinkhaan-header {
-    top: 100%;
     transform: translateY(0);
   }
 }
