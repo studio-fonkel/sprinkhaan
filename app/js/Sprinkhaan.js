@@ -12,8 +12,11 @@ class Sprinkhaan extends EventEmitter {
     inner = false;
     close = false;
 
+    easing = 'cubic-bezier(.61,.14,.5,.93)';
+
     properties = {
-      state: 'collapsed'
+        state: 'collapsed',
+        animating: false
     };
 
     constructor (elementId) {
@@ -35,8 +38,8 @@ class Sprinkhaan extends EventEmitter {
         this.nonStickyHeader.addEventListener('click', () => this.headerClick());
         this.stickyHeader.addEventListener('click', () => this.headerClick());
         this.close.addEventListener('click', () => this.closeClick());
-
         this.inner.addEventListener('scroll', (event) => this.elementScroll(event));
+        window.addEventListener('wheel', (event) => this.wheelScroll(event));
 
         this.animateToInitialCollapsed();
     }
@@ -56,7 +59,20 @@ class Sprinkhaan extends EventEmitter {
         }
     }
 
-    elementScroll (event) {
+    wheelScroll (event) {
+        if (!this.animating) {
+            let direction = event.deltaY < 0 ? 'down' : 'up';
+            if (event.target === this.nonStickyHeader && this.state === 'collapsed' && direction === 'up' && this.inner.scrollTop === 0) {
+                this.animateToExpanded();
+            }
+
+            if (this.state === 'expanded' && this.inner.scrollTop === 0 && direction === 'down') {
+                this.animateToCollapsed();
+            }
+        }
+    }
+
+    elementScroll () {
         this.element.dataset.stickyHeader = this.inner.scrollTop > this.media.clientHeight;
     }
 
@@ -69,6 +85,15 @@ class Sprinkhaan extends EventEmitter {
         this.properties.state = state;
     }
 
+    get animating () {
+        return this.properties.animating;
+    }
+
+    set animating(state) {
+        this.element.dataset.animating = state;
+        this.properties.animating = state;
+    }
+
     animateToInitialCollapsed () {
         this.state = 'collapsed';
         this.content.style.marginTop = this.nonStickyHeader.clientHeight + 'px';
@@ -77,11 +102,13 @@ class Sprinkhaan extends EventEmitter {
         }, {
             fill: 'forwards',
             duration: 100,
+            easing: this.easing
         });
     }
 
     animateToExpanded () {
         this.state = 'expanded';
+        this.animating = true;
         this.wrapper.animate({
             transform: ['translateY(100vh) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(' + this.media.clientHeight + 'px)'],
         }, {
@@ -89,30 +116,42 @@ class Sprinkhaan extends EventEmitter {
             duration: 300,
         });
 
-        this.media.animate({
+        let animation = this.media.animate({
             transform: ['translateY(100vh)', 'translateY(0)'],
         }, {
             fill: 'forwards',
-            duration: 300,
+            duration: 330,
+            easing: this.easing
         });
+
+        animation.onfinish = () => {
+          this.animating = false;
+        };
     }
 
     animateToCollapsed () {
         this.scrollToTop(this.inner, () => {
+            this.animating = true;
             this.state = 'collapsed';
             this.wrapper.animate({
                 transform: ['translateY(' + this.media.clientHeight + 'px)', 'translateY(100vh) translateY(-' + this.nonStickyHeader.clientHeight + 'px)'],
             }, {
                 fill: 'forwards',
                 duration: 300,
+                easing: this.easing
             });
 
-            this.media.animate({
+            let animation = this.media.animate({
                 transform: ['translateY(0)', 'translateY(100vh)'],
             }, {
                 fill: 'forwards',
                 duration: 300,
+                easing: this.easing
             });
+
+            animation.onfinish = () => {
+                this.animating = false;
+            };
         });
     }
 

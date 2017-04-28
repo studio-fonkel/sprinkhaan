@@ -10,10 +10,11 @@ body {
 
 .sprinkhaan-header {
   padding: 20px;
-  background-color: #ccffcf;
+  background-color: #306134;
+  color: white;
 
   &.is-sticky {
-    padding-left: 70px;
+    padding-left: 55px;
     box-shadow: 0 0 10px black;
   }
 }
@@ -23,5 +24,24 @@ body {
 }
 
 .sprinkhaan-close {
+  &:before, &:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    content: '';
+    background-color: white;
+    width: 15px;
+    height: 5px;
+    border-radius: 4px;
+  }
 
+  &:before {
+    transform-origin: bottom left;
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+
+  &:after{
+    transform-origin: top left;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
 }
