@@ -1,6 +1,7 @@
 node_modules
-dist
-.tmp
-bower_components
-test/bower_components
 .idea
+.DS_STORE
+app/css
+app/lib
+.tmp
+yarn.lock
