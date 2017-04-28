@@ -22,16 +22,25 @@ $speed: .8s;
     position: fixed;
     overflow: hidden;
     height: 100vh;
+    width: 100%;
   }
 
   .sprinkhaan-media {
-    pointer-events: auto;
+    width: 100%;
     transform: translate(100vh);
+    padding-bottom: 57%;
 
+    iframe,
     img {
       display: block;
       width: 100%;
+      height: 100%;
       object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
     }
   }
 
@@ -86,7 +95,7 @@ $speed: .8s;
   }
 
   .sprinkhaan-header.is-not-sticky {
-    opacity: 0;
-    z-index: -1;
+    //opacity: 0;
+    //z-index: -1;
   }
 }

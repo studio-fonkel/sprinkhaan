@@ -7,6 +7,7 @@
       "packages": "app/lib"
     },
     "dependencies": {
+      "hammer": "github:hammerjs/hammer.js@^2.0.8",
       "web-animations/web-animations-js": "github:web-animations/web-animations-js@^2.2.5"
     },
     "devDependencies": {

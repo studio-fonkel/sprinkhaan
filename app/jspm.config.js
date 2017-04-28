@@ -34,7 +34,8 @@ SystemJS.config({
     ]
   },
   map: {
-    "babel": "npm:babel-core@5.8.38"
+    "babel": "npm:babel-core@5.8.38",
+    "web-animations": "github:web-animations/web-animations-js@2.2.5"
   }
 });
 
@@ -46,7 +47,7 @@ SystemJS.config({
   ],
   map: {
     "events": "npm:jspm-nodelibs-events@0.2.0",
-    "web-animations": "github:web-animations/web-animations-js@2.2.5"
+    "hammer": "github:hammerjs/hammer.js@2.0.8"
   },
   packages: {}
 });

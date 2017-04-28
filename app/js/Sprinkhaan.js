@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
 import 'web-animations';
+import 'hammer';
 
 class Sprinkhaan extends EventEmitter {
 
@@ -40,6 +41,24 @@ class Sprinkhaan extends EventEmitter {
         this.close.addEventListener('click', () => this.closeClick());
         this.inner.addEventListener('scroll', (event) => this.elementScroll(event));
         window.addEventListener('wheel', (event) => this.wheelScroll(event));
+
+        let hammertimeHeader = new Hammer(this.nonStickyHeader, {});
+        hammertimeHeader.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+
+        hammertimeHeader.on('swipeup', () => {
+            if (!this.animating && this.state === 'collapsed') {
+                this.animateToExpanded();
+            }
+        });
+
+        let hammertimeContainer = new Hammer(this.media, {});
+        hammertimeContainer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+
+        hammertimeContainer.on('swipedown', (event) => {
+            if (!this.animating && this.state === 'expanded' && this.inner.scrollTop === 0) {
+                this.animateToCollapsed();
+            }
+        });
 
         this.animateToInitialCollapsed();
     }
