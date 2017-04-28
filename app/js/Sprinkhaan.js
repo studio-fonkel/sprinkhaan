@@ -20,6 +20,9 @@ class Sprinkhaan extends EventEmitter {
         animating: false
     };
 
+    hammertimeHeader = false;
+    hammertimeContainer = false;
+
     constructor (elementId) {
         super();
 
@@ -42,19 +45,19 @@ class Sprinkhaan extends EventEmitter {
         this.inner.addEventListener('scroll', (event) => this.elementScroll(event));
         window.addEventListener('wheel', (event) => this.wheelScroll(event));
 
-        let hammertimeHeader = new Hammer(this.nonStickyHeader, {});
-        hammertimeHeader.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+        this.hammertimeHeader = new Hammer(this.nonStickyHeader, {});
+        this.hammertimeHeader.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
 
-        hammertimeHeader.on('swipeup', () => {
+        this.hammertimeHeader.on('swipeup', () => {
             if (!this.animating && this.state === 'collapsed') {
                 this.animateToExpanded();
             }
         });
 
-        let hammertimeContainer = new Hammer(this.media, {});
-        hammertimeContainer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+        this.hammertimeContainer = new Hammer(this.media, {});
+        this.hammertimeContainer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
 
-        hammertimeContainer.on('swipedown', (event) => {
+        this.hammertimeContainer.on('swipedown', (event) => {
             if (!this.animating && this.state === 'expanded' && this.inner.scrollTop === 0) {
                 this.animateToCollapsed();
             }
@@ -184,6 +187,22 @@ class Sprinkhaan extends EventEmitter {
         else {
             callback();
         }
+    }
+
+    hide () {
+        this.animating = true;
+        this.state = 'hidden';
+        let animation = this.wrapper.animate({
+            transform: ['translateY(100vh) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(100vh) translateY(0)'],
+        }, {
+            fill: 'forwards',
+            duration: 100,
+            easing: this.easing
+        });
+
+        animation.onfinish = () => {
+            this.animating = false;
+        };
     }
 
 }

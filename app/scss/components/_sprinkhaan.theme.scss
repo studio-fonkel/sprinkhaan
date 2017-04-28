@@ -4,26 +4,35 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
 * {
   box-sizing: border-box;
 }
 
 .sprinkhaan-header {
-  padding: 20px;
+  padding: 15px;
   background-color: #306134;
   color: white;
 
   &.is-sticky {
-    padding-left: 55px;
+    padding-left: 45px;
     box-shadow: 0 0 10px black;
   }
 }
 
 .sprinkhaan-content {
-  padding: 20px;
+  padding: 15px;
 }
 
-.sprinkhaan-close {
+.sprinkhaan-container .sprinkhaan-close {
+  left: 15px;
+  top: 15px;
+
   &:before, &:after {
     position: absolute;
     top: 50%;
