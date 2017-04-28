@@ -1,0 +1,66 @@
+// bower:scss
+// endbower
+
+button {
+  position: fixed;
+  left: 10px;
+  top: 10px;
+  z-index: 999;
+}
+
+$speed: 1s;
+
+.sprinkhaan-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  transform: translateY(100%);
+  width: 100vw;
+  height: 100vh;
+  transition: all $speed ease;
+  background: grey;
+
+  .sprinkhaan-media {
+    img {
+      display: block;
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .sprinkhaan-wrapper {
+    position: absolute;
+    transition: all $speed ease;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .sprinkhaan-header {
+    background: pink;
+    height: 50px;
+    transition: all $speed ease;
+    transform: translateY(-100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
+
+.sprinkhaan-container[data-state="expanded"] {
+  transform: translateY(0);
+
+
+  .sprinkhaan-media {
+  }
+  .sprinkhaan-wrapper {
+    position: relative;
+    transform: translateY(0);
+  }
+  .sprinkhaan-header {
+    top: 100%;
+    transform: translateY(0);
+  }
+}
