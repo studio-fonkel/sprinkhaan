@@ -1,6 +1,8 @@
 // bower:scss
 // endbower
 
+@import '_sprinkhaan';
+
 button {
   position: fixed;
   left: 10px;
@@ -8,65 +10,3 @@ button {
   z-index: 999;
 }
 
-$speed: .8s;
-
-.sprinkhaan-container {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  transform: translateY(100%);
-  width: 100vw;
-  height: 100vh;
-  transition: all $speed ease;
-  background: grey;
-
-  .sprinkhaan-media {
-    max-height: 0vh;
-    transition: max-height $speed ease 0s;
-    overflow: hidden;
-
-    img {
-      display: block;
-      width: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .sprinkhaan-wrapper {
-    position: absolute;
-    transition: all $speed ease;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
-
-  .sprinkhaan-header {
-    background: rgba(red, .5);
-    height: 50px;
-    transition: all $speed ease $speed;
-    transform: translateY(-100%);
-    position: relative;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-}
-
-.sprinkhaan-container[data-state="expanded"] {
-  transform: translateY(0);
-
-  .sprinkhaan-media {
-    max-height: 100vh;
-    transition: max-height $speed linear .3s;
-  }
-
-  .sprinkhaan-wrapper {
-    position: relative;
-    transform: translateY(0);
-  }
-  .sprinkhaan-header {
-    transition: all $speed ease 0s;
-    transform: translateY(0);
-  }
-}

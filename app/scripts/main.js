@@ -1,6 +1,9 @@
+import Sprinkhaan from './Sprinkhaan.js';
+
 let mybutton = document.getElementById('togglebutton');
-let sprinkhaan = document.querySelector('.sprinkhaan-container');
+let mySprinkhaan = new Sprinkhaan();
 
 mybutton.addEventListener("click", function(){
-  sprinkhaan.dataset.state = sprinkhaan.dataset.state == 'expanded' ? 'collapsed' : 'expanded';
+  sprinkhaan.dataset.state = sprinkhaan.dataset.state === 'expanded' ? 'collapsed' : 'expanded';
 });
+

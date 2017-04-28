@@ -1,0 +1,45 @@
+$speed: .8s;
+
+.sprinkhaan-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translateY(90vh);
+  width: 100vw;
+  height: 100vh;
+  transition: all $speed linear;
+  background: grey;
+
+  .sprinkhaan-media {
+    img {
+      display: block;
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .sprinkhaan-header {
+    position: absolute;
+    background: black;
+    color: white;
+    height: 50px;
+    transition: transform $speed linear 0s;
+    left: 0;
+    top: 0;
+    transform: translateY(-100%);
+    width: 100%;
+    z-index: 2;
+  }
+}
+
+.sprinkhaan-container[data-state="expanded"] {
+  transform: translateY(0);
+
+  .sprinkhaan-media {
+    transform: translateY(0);
+    max-height: 100vh;
+  }
+  .sprinkhaan-header {
+    transform: translateY(0);
+  }
+}
