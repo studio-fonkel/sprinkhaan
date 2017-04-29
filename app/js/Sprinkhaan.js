@@ -119,8 +119,16 @@ class Sprinkhaan extends EventEmitter {
     animateToInitialCollapsed () {
         this.state = 'collapsed';
         this.content.style.marginTop = this.nonStickyHeader.clientHeight + 'px';
+
+        this.media.animate({
+            transform: ['translateY(' + window.innerHeight + 'px)', 'translateY(' + window.innerHeight + 'px)'],
+        }, {
+            fill: 'forwards',
+            duration: 0
+        });
+
         this.wrapper.animate({
-            transform: ['translateY(100vh) translateY(0)', 'translateY(100vh) translateY(-' + this.nonStickyHeader.clientHeight + 'px)'],
+            transform: ['translateY(' + window.innerHeight + 'px) translateY(0)', 'translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)'],
         }, {
             fill: 'forwards',
             duration: 100,
@@ -132,14 +140,14 @@ class Sprinkhaan extends EventEmitter {
         this.state = 'expanded';
         this.animating = true;
         this.wrapper.animate({
-            transform: ['translateY(100vh) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(' + this.media.clientHeight + 'px)'],
+            transform: ['translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(' + this.media.clientHeight + 'px)'],
         }, {
             fill: 'forwards',
             duration: 300,
         });
 
         let animation = this.media.animate({
-            transform: ['translateY(100vh)', 'translateY(0)'],
+            transform: ['translateY(' + window.innerHeight + 'px)', 'translateY(0)'],
         }, {
             fill: 'forwards',
             duration: 330,
@@ -156,7 +164,7 @@ class Sprinkhaan extends EventEmitter {
             this.animating = true;
             this.state = 'collapsed';
             this.wrapper.animate({
-                transform: ['translateY(' + this.media.clientHeight + 'px)', 'translateY(100vh) translateY(-' + this.nonStickyHeader.clientHeight + 'px)'],
+                transform: ['translateY(' + this.media.clientHeight + 'px)', 'translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)'],
             }, {
                 fill: 'forwards',
                 duration: 300,
@@ -164,7 +172,7 @@ class Sprinkhaan extends EventEmitter {
             });
 
             let animation = this.media.animate({
-                transform: ['translateY(0)', 'translateY(100vh)'],
+                transform: ['translateY(0)', 'translateY(' + window.innerHeight + 'px)'],
             }, {
                 fill: 'forwards',
                 duration: 300,
@@ -193,7 +201,7 @@ class Sprinkhaan extends EventEmitter {
         this.animating = true;
         this.state = 'hidden';
         let animation = this.wrapper.animate({
-            transform: ['translateY(100vh) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(100vh) translateY(0)'],
+            transform: ['translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(' + window.innerHeight + 'px) translateY(0)'],
         }, {
             fill: 'forwards',
             duration: 100,

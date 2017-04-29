@@ -10,7 +10,7 @@ gulp.task('css', function () {
     .pipe(sassGlob())
     .pipe(sass())
     .pipe(autoprefixer({
-        browsers: ['last 2 versions'],
+        browsers: ['last 20 versions'],
         cascade: false
     }))
     .pipe(gulp.dest(global.paths.css))
