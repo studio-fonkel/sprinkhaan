@@ -47,7 +47,7 @@ SystemJS.config({
   ],
   map: {
     "events": "npm:jspm-nodelibs-events@0.2.0",
-    "hammer": "github:hammerjs/hammer.js@2.0.8"
+    "zingtouch": "github:zingchart/zingtouch@1.0.5"
   },
   packages: {}
 });

@@ -7,8 +7,8 @@
       "packages": "app/lib"
     },
     "dependencies": {
-      "hammer": "github:hammerjs/hammer.js@^2.0.8",
-      "web-animations/web-animations-js": "github:web-animations/web-animations-js@^2.2.5"
+      "web-animations/web-animations-js": "github:web-animations/web-animations-js@^2.2.5",
+      "zingchart/zingtouch": "github:zingchart/zingtouch@^1.0.5"
     },
     "devDependencies": {
       "babel-runtime": "npm:babel-runtime@^5.8.24",

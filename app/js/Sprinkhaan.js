@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import 'web-animations';
-import 'hammer';
+import ZingTouch from 'zingtouch';
 
 class Sprinkhaan extends EventEmitter {
 
@@ -20,8 +20,7 @@ class Sprinkhaan extends EventEmitter {
         animating: false
     };
 
-    hammertimeHeader = false;
-    hammertimeContainer = false;
+    touchRegion = false;
 
     constructor (elementId) {
         super();
@@ -45,23 +44,27 @@ class Sprinkhaan extends EventEmitter {
         this.inner.addEventListener('scroll', (event) => this.elementScroll(event));
         window.addEventListener('wheel', (event) => this.wheelScroll(event));
 
-        this.hammertimeHeader = new Hammer(this.nonStickyHeader, {});
-        this.hammertimeHeader.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+        this.touchRegion = new ZingTouch.Region(document.body);
 
-        this.hammertimeHeader.on('swipeup', () => {
-            if (!this.animating && this.state === 'collapsed') {
-                this.animateToExpanded();
+        this.touchRegion.bind(this.close, 'tap', () => {
+            this.closeClick();
+        });
+
+        this.touchRegion.bind(this.nonStickyHeader, 'swipe', (event) => {
+            if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135) {
+                if (!this.animating && this.state === 'collapsed') {
+                    this.animateToExpanded();
+                }
             }
         });
 
-        this.hammertimeContainer = new Hammer(this.media, {});
-        this.hammertimeContainer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
-
-        this.hammertimeContainer.on('swipedown', (event) => {
-            if (!this.animating && this.state === 'expanded' && this.inner.scrollTop === 0) {
-                this.animateToCollapsed();
+        this.touchRegion.bind(this.element, 'swipe', (event) => {
+            if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315) {
+                if (!this.animating && this.state === 'expanded' && this.inner.scrollTop === 0) {
+                    this.animateToCollapsed();
+                }
             }
-        });
+        }, true);
 
         this.animateToInitialCollapsed();
     }
