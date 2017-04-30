@@ -2,30 +2,6 @@ import EventEmitter from 'events';
 import 'web-animations/web-animations-next.min';
 import ZingTouch from 'zingtouch';
 
-let debounce = function (func, wait, context, immediate) {
-
-    'use strict';
-
-    var timeout;
-    var result;
-    return function () {
-        var args = arguments;
-        var later = function () {
-            timeout = null;
-            if (!immediate) {
-                result = func.apply(context, args);
-            }
-        };
-        var callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) {
-            result = func.apply(context, args);
-        }
-        return result;
-    };
-};
-
 class Sprinkhaan extends EventEmitter {
 
     prefix = '.sprinkhaan-';
@@ -52,7 +28,8 @@ class Sprinkhaan extends EventEmitter {
 
     properties = {
         state: 'hidden',
-        isAnimating: false
+        isAnimating: false,
+        isPanning: false
     };
 
     constructor (options) {
@@ -72,6 +49,23 @@ class Sprinkhaan extends EventEmitter {
     }
 
     attachEventHandlers () {
+        let panStop = () => {
+            if (this.isPanning) {
+                this.isPanning = false;
+
+                if (this.state === 'collapsed') {
+                    this.expand();
+                }
+                else {
+                    this.collapse();
+                }
+            }
+        };
+
+        this.element.addEventListener('touchend', panStop);
+
+        this.element.addEventListener('mouseup', panStop);
+
         this.touchRegion = new ZingTouch.Region(document.body);
 
         this.elements['inner'].addEventListener('scroll', (event) => this.elementScroll(event));
@@ -105,40 +99,35 @@ class Sprinkhaan extends EventEmitter {
             }
         });
 
-        let debouncedExpand = debounce(() => {
-            this.createAnimations(true); // We need to recreate the animation with the current offset.
-            this.expand();
-        }, 600, this);
-
-        let debouncedCollapse = debounce(() => {
-            this.createAnimations(true); // We need to recreate the animation with the current offset.
-            this.expand();
-        }, 600, this);
-
         this.touchRegion.bind(this.element, 'pan', (event) => {
             if (!this.isAnimating) {
                 let panned = event.detail.data[0].distanceFromOrigin;
 
-                if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135) {
-                    let passedDistance = panned; // TODO Add math so the pan progress feels natural.
+                if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 && this.state === 'collapsed') {
+                    this.isPanning = true;
 
-                    this.animations.popup.media._animation.currentTime = passedDistance;
+                    this.animations.popup.media._animation.currentTime = panned;
                     this.animations.popup.media.pause();
 
-                    this.animations.popup.contentWrapper._animation.currentTime = passedDistance;
+                    this.animations.popup.contentWrapper._animation.currentTime = panned;
                     this.animations.popup.contentWrapper.pause();
 
-                    debouncedExpand();
                 }
 
-                if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315) {
+                if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315 && this.state === 'expanded') {
+                    this.isPanning = true;
 
+                    this.animations.popup.media._animation.currentTime = 300 - panned;
+                    this.animations.popup.media.pause();
+
+                    this.animations.popup.contentWrapper._animation.currentTime = 330 - panned;
+                    this.animations.popup.contentWrapper.pause();
                 }
             }
         });
     }
 
-    createAnimations (fromCurrentPosition) {
+    createAnimations () {
         let finished = () => {
             this.isAnimating = false;
         };
@@ -155,25 +144,10 @@ class Sprinkhaan extends EventEmitter {
         this.animations.teaser = new Animation(teaserKeyFrames, document.timeline);
         this.animations.teaser.onfinish = finished;
 
-        let translateY = window.innerHeight;
-
-        if (fromCurrentPosition) {
-            let computedStyle = window.getComputedStyle(this.elements['media'], null);
-            let transform = computedStyle.getPropertyValue("-webkit-transform") ||
-                computedStyle.getPropertyValue("-moz-transform") ||
-                computedStyle.getPropertyValue("-ms-transform") ||
-                computedStyle.getPropertyValue("-o-transform") ||
-                computedStyle.getPropertyValue("transform");
-
-            translateY = parseFloat(transform.split(',')[5].replace(')', ''));
-        }
-
-        console.log(translateY)
-
         let popupMediaKeyFrames = new KeyframeEffect(
             this.elements['media'],
             [
-                { transform: 'translateY(' + translateY + 'px)' },
+                { transform: 'translateY(' + window.innerHeight + 'px)' },
                 { transform: 'translateY(0)' }
             ],
             { duration: 300, fill: 'both' }
@@ -230,24 +204,30 @@ class Sprinkhaan extends EventEmitter {
         this.properties.isAnimating = state;
     }
 
-    expand () {
-        // this.createAnimations(); // TODO find out why it is needed to rebuild the animations.
+    get isPanning () {
+        return this.properties.isPanning;
+    }
 
+    set isPanning(state) {
+        this.properties.isPanning = state;
+    }
+
+    expand () {
         this.isAnimating = true;
         this.state = 'expanded';
         this.animations.popup.media.play();
         this.animations.popup.contentWrapper.play();
+        this.createAnimations();
         return this;
     }
 
     collapse () {
         this.scrollToTop(this.elements['inner'], () => {
-            this.createAnimations(); // TODO find out why it is needed to rebuild the animations.
-
             this.isAnimating = true;
             this.state = 'collapsed';
             this.animations.popup.media.reverse();
             this.animations.popup.contentWrapper.reverse();
+            this.createAnimations();
         });
 
         return this;
@@ -263,6 +243,17 @@ class Sprinkhaan extends EventEmitter {
         this.animations.teaser.reverse();
         this.state = 'hidden';
         return this;
+    }
+
+    getTransformyFromElement(element) {
+        let computedStyle = window.getComputedStyle(element, null);
+        let transform = computedStyle.getPropertyValue("-webkit-transform") ||
+            computedStyle.getPropertyValue("-moz-transform") ||
+            computedStyle.getPropertyValue("-ms-transform") ||
+            computedStyle.getPropertyValue("-o-transform") ||
+            computedStyle.getPropertyValue("transform");
+
+        return parseFloat(transform.split(',')[5].replace(')', ''));
     }
 
     destroy () {
