@@ -15,7 +15,7 @@ body {overflow-y:hidden; }
   height: 100%;
   pointer-events: none;
 
-  .sprinkhaan-close {
+  .sprinkhaan-close-button {
     position: absolute;
     top: 20px;
     left: 20px;
@@ -85,14 +85,14 @@ body {overflow-y:hidden; }
   }
 }
 
-.sprinkhaan-container[data-state="expanded"][data-animating="false"] {
+.sprinkhaan-container[data-state="expanded"] {
   .sprinkhaan-inner {
     overflow-y: scroll;
   }
 }
 
 .sprinkhaan-container[data-state="expanded"]{
-  .sprinkhaan-close {
+  .sprinkhaan-close-button {
     opacity: 1;
     z-index: 11;
     pointer-events: auto;

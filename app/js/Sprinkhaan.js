@@ -4,79 +4,78 @@ import ZingTouch from 'zingtouch';
 
 class Sprinkhaan extends EventEmitter {
 
-    element = false;
-    wrapper = false;
-    stickyHeader = false;
-    nonStickyHeader = false;
-    content = false;
-    media = false;
-    inner = false;
-    close = false;
-
+    prefix = '.sprinkhaan-';
     easing = 'cubic-bezier(.61,.14,.5,.93)';
 
-    animations = {
-        animateToExpanded: {},
-        animateToCollapsed: {}
+    selector = '#sprinkhaan';
+    element = false;
+    elements = {
+        'content-wrapper': false,
+        'header.is-sticky': false,
+        'header.is-not-sticky': false,
+        'content': false,
+        'media': false,
+        'inner': false,
+        'close-button': false
     };
 
-    properties = {
-        state: 'collapsed',
-        animating: false
+    animations = {
+        teaser: {},
+        popup: {}
     };
 
     touchRegion = false;
 
-    constructor (elementId) {
-        super();
+    properties = {
+        state: 'hidden'
+    };
 
-        this.element = document.querySelector(elementId);
+    constructor (options) {
+        super();
+        Object.assign(this, options);
+
+        this.element = document.querySelector(this.selector);
         if (!this.element) { throw 'Sprinkhaan needs a valid element to function'; }
 
-        this.wrapper = this.element.querySelector('.sprinkhaan-content-wrapper');
-        this.nonStickyHeader = this.element.querySelector('.sprinkhaan-header.is-not-sticky');
-        this.stickyHeader = this.element.querySelector('.sprinkhaan-header.is-sticky');
-        this.content = this.element.querySelector('.sprinkhaan-content');
-        this.media = this.element.querySelector('.sprinkhaan-media');
-        this.inner = this.element.querySelector('.sprinkhaan-inner');
-        this.close = this.element.querySelector('.sprinkhaan-close');
+        Object.keys(this.elements).forEach((subElement, delta) => {
+            this.elements[subElement] = this.element.querySelector(this.prefix + subElement);
+        });
 
-        if (!this.nonStickyHeader || !this.content || !this.wrapper) { throw 'Sprinkhaan needs valid markup inside the element to function'; }
-
-        this.attachEventHandlers();
+        this.elements['content'].style.marginTop = this.elements['header.is-not-sticky'].clientHeight + 'px';
         this.createAnimations();
-
-        this.animateToInitialCollapsed();
+        this.attachEventHandlers();
     }
 
     attachEventHandlers () {
         this.touchRegion = new ZingTouch.Region(document.body);
 
-        this.inner.addEventListener('scroll', (event) => this.elementScroll(event));
-        window.addEventListener('wheel', (event) => this.wheelScroll(event));
+        this.elements['inner'].addEventListener('scroll', (event) => this.elementScroll(event));
+        // window.addEventListener('wheel', (event) => this.wheelScroll(event));
 
-        this.touchRegion.bind(this.close, 'tap', () => {
-            this.closeClick();
-        });
-
-        this.touchRegion.bind(this.nonStickyHeader, 'tap', () => {
-            if (!this.animating && this.state === 'collapsed') {
-                this.animateToExpanded();
+        this.touchRegion.bind(this.elements['close-button'], 'tap', () => {
+            if (this.state === 'expanded') {
+                this.collapse();
             }
         });
 
-        this.touchRegion.bind(this.nonStickyHeader, 'swipe', (event) => {
+        this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', () => {
+            if (this.state === 'collapsed') {
+                this.expand();
+            }
+        });
+
+        this.touchRegion.bind(this.elements['header.is-not-sticky'], 'swipe', (event) => {
             if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135) {
-                if (!this.animating && this.state === 'collapsed') {
-                    this.animateToExpanded();
+                if (this.state === 'collapsed') {
+                    this.expand();
                 }
             }
         });
 
         this.touchRegion.bind(this.element, 'swipe', (event) => {
             if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315) {
-                if (!this.animating && this.state === 'expanded' && this.inner.scrollTop === 0) {
-                    this.animateToCollapsed();
+                if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0) {
+                    this.collapse();
                 }
             }
         });
@@ -95,30 +94,54 @@ class Sprinkhaan extends EventEmitter {
     }
 
     createAnimations () {
+        let teaserKeyFrames = new KeyframeEffect(
+            this.elements['content-wrapper'],
+            [
+                { transform: 'translateY(' + window.innerHeight + 'px) translateY(0)' },
+                { transform: 'translateY(' + window.innerHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
+            ],
+            { duration: 300, fill: 'both' }
+        );
 
-    }
+        this.animations.teaser = new Animation(teaserKeyFrames, document.timeline);
 
-    closeClick () {
-        if (this.state === 'expanded') {
-            this.animateToCollapsed();
-        }
+        let popupMediaKeyFrames = new KeyframeEffect(
+            this.elements['media'],
+            [
+                { transform: 'translateY(' + window.innerHeight + 'px)' },
+                { transform: 'translateY(0)' }
+            ],
+            { duration: 300, fill: 'both' }
+        );
+
+        this.animations.popup.media = new Animation(popupMediaKeyFrames, document.timeline);
+
+        let popupContentWrapperKeyFrames = new KeyframeEffect(
+            this.elements['content-wrapper'],
+            [
+                { transform: 'translateY(' + window.innerHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
+                { transform: 'translateY(' + this.elements['media'].clientHeight + 'px) translateY(0)' }
+            ],
+            { duration: 300, fill: 'both' }
+        );
+
+        this.animations.popup.contentWrapper = new Animation(popupContentWrapperKeyFrames, document.timeline);
+
     }
 
     wheelScroll (event) {
-        if (!this.animating) {
-            let direction = event.deltaY < 0 ? 'down' : 'up';
-            if (event.target === this.nonStickyHeader && this.state === 'collapsed' && direction === 'up' && this.inner.scrollTop === 0) {
-                this.animateToExpanded();
-            }
+        let direction = event.deltaY < 0 ? 'down' : 'up';
+        if (event.target === this.elements['header.is-sticky'] && this.state === 'collapsed' && direction === 'up' && this.inner.scrollTop === 0) {
+            this.expand();
+        }
 
-            if (this.state === 'expanded' && this.inner.scrollTop === 0 && direction === 'down') {
-                this.animateToCollapsed();
-            }
+        if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0 && direction === 'down') {
+            this.collapse();
         }
     }
 
     elementScroll () {
-        this.element.dataset.stickyHeader = this.inner.scrollTop > this.media.clientHeight;
+        this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > this.elements['media'].clientHeight;
     }
 
     get state () {
@@ -130,84 +153,41 @@ class Sprinkhaan extends EventEmitter {
         this.properties.state = state;
     }
 
-    get animating () {
-        return this.properties.animating;
-    }
-
-    set animating(state) {
-        this.element.dataset.animating = state;
-        this.properties.animating = state;
-    }
-
-    animateToInitialCollapsed () {
-        this.state = 'collapsed';
-        this.content.style.marginTop = this.nonStickyHeader.clientHeight + 'px';
-
-        this.media.animate({
-            transform: ['translateY(' + window.innerHeight + 'px)', 'translateY(' + window.innerHeight + 'px)'],
-        }, {
-            fill: 'forwards',
-            duration: 0
-        });
-
-        this.wrapper.animate({
-            transform: ['translateY(' + window.innerHeight + 'px) translateY(0)', 'translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)'],
-        }, {
-            fill: 'forwards',
-            duration: 100,
-            easing: this.easing
-        });
-    }
-
-    animateToExpanded () {
+    expand () {
+        console.log('expand')
         this.state = 'expanded';
-        this.animating = true;
-
-        this.animations.animateToExpanded.wrapper = this.wrapper.animate({
-            transform: ['translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(' + this.media.clientHeight + 'px)'],
-        }, {
-            fill: 'forwards',
-            duration: 300,
-        });
-
-        this.animations.animateToExpanded.media = this.media.animate({
-            transform: ['translateY(' + window.innerHeight + 'px)', 'translateY(0)'],
-        }, {
-            fill: 'forwards',
-            duration: 330,
-            easing: this.easing
-        });
-
-        this.animations.animateToExpanded.media.onfinish = () => {
-          this.animating = false;
-        };
+        this.animations.popup.media.play();
+        this.animations.popup.contentWrapper.play();
+        return this;
     }
 
-    animateToCollapsed () {
-        this.scrollToTop(this.inner, () => {
-            this.animating = true;
+    collapse () {
+        this.scrollToTop(this.elements['inner'], () => {
+            console.log('collapse')
             this.state = 'collapsed';
-
-            this.animations.animateToCollapsed.wrapper = this.wrapper.animate({
-                transform: ['translateY(' + this.media.clientHeight + 'px)', 'translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)'],
-            }, {
-                fill: 'forwards',
-                duration: 300,
-                easing: this.easing
-            });
-
-            this.animations.animateToCollapsed.media = this.media.animate({
-                transform: ['translateY(0)', 'translateY(' + window.innerHeight + 'px)'],
-            }, {
-                fill: 'forwards',
-                duration: 300,
-                easing: this.easing
-            });
-
-            this.animations.animateToCollapsed.media.onfinish = () => {
-                this.animating = false;
-            };
+            this.animations.popup.media.reverse();
+            this.animations.popup.contentWrapper.reverse();
         });
+
+        return this;
+    }
+
+    show () {
+        console.log('show')
+        this.state = 'collapsed';
+        this.animations.teaser.play();
+        return this;
+    }
+
+    hide () {
+        console.log('hide')
+        this.animations.teaser.reverse();
+        this.state = 'hidden';
+        return this;
+    }
+
+    destroy () {
+
     }
 
     scrollToTop (element, callback) {
@@ -220,22 +200,6 @@ class Sprinkhaan extends EventEmitter {
         else {
             callback();
         }
-    }
-
-    hide () {
-        this.animating = true;
-        this.state = 'hidden';
-        let animation = this.wrapper.animate({
-            transform: ['translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(' + window.innerHeight + 'px) translateY(0)'],
-        }, {
-            fill: 'forwards',
-            duration: 100,
-            easing: this.easing
-        });
-
-        animation.onfinish = () => {
-            this.animating = false;
-        };
     }
 
 }
