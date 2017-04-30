@@ -53,11 +53,25 @@ class Sprinkhaan extends EventEmitter {
             if (this.isPanning) {
                 this.isPanning = false;
 
+                let percentageDone = Math.round(100 / this.animations.popup.contentWrapper.effect.activeDuration * this.animations.popup.contentWrapper._animation.currentTime);
+
                 if (this.state === 'collapsed') {
-                    this.expand();
+                    if (percentageDone > 20) {
+                        this.expand();
+                    }
+                    else {
+                        this.collapse();
+                    }
                 }
                 else {
-                    this.collapse();
+                    percentageDone = 100 - percentageDone;
+
+                    if (percentageDone > 20) {
+                        this.collapse();
+                    }
+                    else {
+                        this.expand();
+                    }
                 }
             }
         };
@@ -104,24 +118,25 @@ class Sprinkhaan extends EventEmitter {
                 let panned = event.detail.data[0].distanceFromOrigin;
 
                 if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 && this.state === 'collapsed') {
-                    this.isPanning = true;
+                    if (!this.isPanning) {
+                        this.isPanning = true;
+                        this.animations.popup.media.pause();
+                        this.animations.popup.contentWrapper.pause();
+                    }
 
-                    this.animations.popup.media._animation.currentTime = panned;
-                    this.animations.popup.media.pause();
-
-                    this.animations.popup.contentWrapper._animation.currentTime = panned;
-                    this.animations.popup.contentWrapper.pause();
-
+                    this.animations.popup.media._animation.currentTime = Math.min(this.animations.popup.media.effect.activeDuration - .1, panned);
+                    this.animations.popup.contentWrapper._animation.currentTime = Math.min(this.animations.popup.contentWrapper.effect.activeDuration - .1, panned);
                 }
 
-                if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315 && this.state === 'expanded') {
-                    this.isPanning = true;
+                if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315 && this.state === 'expanded' && this.elements['inner'].scrollTop === 0) {
+                    if (!this.isPanning) {
+                        this.isPanning = true;
+                        this.animations.popup.media.pause();
+                        this.animations.popup.contentWrapper.pause();
+                    }
 
-                    this.animations.popup.media._animation.currentTime = 300 - panned;
-                    this.animations.popup.media.pause();
-
-                    this.animations.popup.contentWrapper._animation.currentTime = 330 - panned;
-                    this.animations.popup.contentWrapper.pause();
+                    this.animations.popup.media._animation.currentTime = Math.max(0, this.animations.popup.media.effect.activeDuration - panned);
+                    this.animations.popup.contentWrapper._animation.currentTime = Math.max(0, this.animations.popup.contentWrapper.effect.activeDuration - panned);
                 }
             }
         });
@@ -138,7 +153,7 @@ class Sprinkhaan extends EventEmitter {
                 { transform: 'translateY(' + window.innerHeight + 'px) translateY(0)' },
                 { transform: 'translateY(' + window.innerHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
             ],
-            { duration: 300, fill: 'both' }
+            { duration: 300, fill: 'both', easing: this.easing }
         );
 
         this.animations.teaser = new Animation(teaserKeyFrames, document.timeline);
@@ -147,10 +162,10 @@ class Sprinkhaan extends EventEmitter {
         let popupMediaKeyFrames = new KeyframeEffect(
             this.elements['media'],
             [
-                { transform: 'translateY(' + window.innerHeight + 'px)' },
+                { transform: 'translateY(' + (window.innerHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
                 { transform: 'translateY(0)' }
             ],
-            { duration: 300, fill: 'both' }
+            { duration: 300, fill: 'both', easing: this.easing }
         );
 
         this.animations.popup.media = new Animation(popupMediaKeyFrames, document.timeline);
@@ -162,7 +177,7 @@ class Sprinkhaan extends EventEmitter {
                 { transform: 'translateY(' + window.innerHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
                 { transform: 'translateY(' + this.elements['media'].clientHeight + 'px) translateY(0)' }
             ],
-            { duration: 300, fill: 'both' }
+            { duration: 300, fill: 'both', easing: this.easing }
         );
 
         this.animations.popup.contentWrapper = new Animation(popupContentWrapperKeyFrames, document.timeline);
@@ -243,17 +258,6 @@ class Sprinkhaan extends EventEmitter {
         this.animations.teaser.reverse();
         this.state = 'hidden';
         return this;
-    }
-
-    getTransformyFromElement(element) {
-        let computedStyle = window.getComputedStyle(element, null);
-        let transform = computedStyle.getPropertyValue("-webkit-transform") ||
-            computedStyle.getPropertyValue("-moz-transform") ||
-            computedStyle.getPropertyValue("-ms-transform") ||
-            computedStyle.getPropertyValue("-o-transform") ||
-            computedStyle.getPropertyValue("transform");
-
-        return parseFloat(transform.split(',')[5].replace(')', ''));
     }
 
     destroy () {
