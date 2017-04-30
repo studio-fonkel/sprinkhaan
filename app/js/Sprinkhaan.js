@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import 'web-animations';
+import 'web-animations/web-animations-next.min';
 import ZingTouch from 'zingtouch';
 
 class Sprinkhaan extends EventEmitter {
@@ -15,7 +15,10 @@ class Sprinkhaan extends EventEmitter {
 
     easing = 'cubic-bezier(.61,.14,.5,.93)';
 
-    panningUp = false;
+    animations = {
+        animateToExpanded: {},
+        animateToCollapsed: {}
+    };
 
     properties = {
         state: 'collapsed',
@@ -40,10 +43,17 @@ class Sprinkhaan extends EventEmitter {
 
         if (!this.nonStickyHeader || !this.content || !this.wrapper) { throw 'Sprinkhaan needs valid markup inside the element to function'; }
 
+        this.attachEventHandlers();
+        this.createAnimations();
+
+        this.animateToInitialCollapsed();
+    }
+
+    attachEventHandlers () {
+        this.touchRegion = new ZingTouch.Region(document.body);
+
         this.inner.addEventListener('scroll', (event) => this.elementScroll(event));
         window.addEventListener('wheel', (event) => this.wheelScroll(event));
-
-        this.touchRegion = new ZingTouch.Region(document.body);
 
         this.touchRegion.bind(this.close, 'tap', () => {
             this.closeClick();
@@ -75,15 +85,17 @@ class Sprinkhaan extends EventEmitter {
             let panned = event.detail.data[0].distanceFromOrigin;
 
             if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135) {
-                console.log(event.detail)
+
             }
 
             if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315) {
 
             }
         });
+    }
 
-        this.animateToInitialCollapsed();
+    createAnimations () {
+
     }
 
     closeClick () {
@@ -150,14 +162,15 @@ class Sprinkhaan extends EventEmitter {
     animateToExpanded () {
         this.state = 'expanded';
         this.animating = true;
-        this.wrapper.animate({
+
+        this.animations.animateToExpanded.wrapper = this.wrapper.animate({
             transform: ['translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)', 'translateY(' + this.media.clientHeight + 'px)'],
         }, {
             fill: 'forwards',
             duration: 300,
         });
 
-        let animation = this.media.animate({
+        this.animations.animateToExpanded.media = this.media.animate({
             transform: ['translateY(' + window.innerHeight + 'px)', 'translateY(0)'],
         }, {
             fill: 'forwards',
@@ -165,8 +178,7 @@ class Sprinkhaan extends EventEmitter {
             easing: this.easing
         });
 
-
-        animation.onfinish = () => {
+        this.animations.animateToExpanded.media.onfinish = () => {
           this.animating = false;
         };
     }
@@ -175,7 +187,8 @@ class Sprinkhaan extends EventEmitter {
         this.scrollToTop(this.inner, () => {
             this.animating = true;
             this.state = 'collapsed';
-            this.wrapper.animate({
+
+            this.animations.animateToCollapsed.wrapper = this.wrapper.animate({
                 transform: ['translateY(' + this.media.clientHeight + 'px)', 'translateY(' + window.innerHeight + 'px) translateY(-' + this.nonStickyHeader.clientHeight + 'px)'],
             }, {
                 fill: 'forwards',
@@ -183,7 +196,7 @@ class Sprinkhaan extends EventEmitter {
                 easing: this.easing
             });
 
-            let animation = this.media.animate({
+            this.animations.animateToCollapsed.media = this.media.animate({
                 transform: ['translateY(0)', 'translateY(' + window.innerHeight + 'px)'],
             }, {
                 fill: 'forwards',
@@ -191,7 +204,7 @@ class Sprinkhaan extends EventEmitter {
                 easing: this.easing
             });
 
-            animation.onfinish = () => {
+            this.animations.animateToCollapsed.media.onfinish = () => {
                 this.animating = false;
             };
         });
