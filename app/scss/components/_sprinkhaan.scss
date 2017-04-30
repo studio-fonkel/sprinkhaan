@@ -70,12 +70,10 @@ body {overflow-y:hidden; }
   }
 
   .sprinkhaan-header.is-not-sticky {
-    cursor: pointer;
     position: absolute;
   }
 
   .sprinkhaan-header.is-sticky {
-    cursor: pointer;
     position: absolute;
     z-index: -1;
     opacity: 0;
@@ -98,6 +96,12 @@ body {overflow-y:hidden; }
     opacity: 1;
     z-index: 11;
     pointer-events: auto;
+  }
+}
+
+.sprinkhaan-container[data-state="collapsed"] {
+  .sprinkhaan-header.is-not-sticky {
+    cursor: pointer;
   }
 }
 

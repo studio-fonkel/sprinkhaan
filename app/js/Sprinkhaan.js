@@ -38,7 +38,6 @@ class Sprinkhaan extends EventEmitter {
 
         if (!this.nonStickyHeader || !this.content || !this.wrapper) { throw 'Sprinkhaan needs valid markup inside the element to function'; }
 
-        this.nonStickyHeader.addEventListener('click', () => this.headerClick());
         this.stickyHeader.addEventListener('click', () => this.headerClick());
         this.close.addEventListener('click', () => this.closeClick());
         this.inner.addEventListener('scroll', (event) => this.elementScroll(event));
