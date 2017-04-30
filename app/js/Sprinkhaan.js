@@ -25,6 +25,7 @@ class Sprinkhaan extends EventEmitter {
     };
 
     touchRegion = false;
+    panningStartTarget = false;
 
     properties = {
         state: 'hidden',
@@ -77,7 +78,6 @@ class Sprinkhaan extends EventEmitter {
         };
 
         this.element.addEventListener('touchend', panStop);
-
         this.element.addEventListener('mouseup', panStop);
 
         this.touchRegion = new ZingTouch.Region(document.body);
@@ -117,7 +117,11 @@ class Sprinkhaan extends EventEmitter {
             if (!this.isAnimating) {
                 let panned = event.detail.data[0].distanceFromOrigin;
 
-                if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 && this.state === 'collapsed') {
+                if (!this.isPanning) {
+                    this.panningStartTarget = event.detail.events[0].originalEvent.target;
+                }
+
+                if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 && this.state === 'collapsed' && this.panningStartTarget === this.elements['header.is-not-sticky']) {
                     if (!this.isPanning) {
                         this.isPanning = true;
                         this.animations.popup.media.pause();
@@ -198,6 +202,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     elementScroll () {
+        this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > (this.elements['media'].clientHeight - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > this.elements['media'].clientHeight;
     }
 

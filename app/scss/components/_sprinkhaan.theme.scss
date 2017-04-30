@@ -19,15 +19,17 @@ html, body {
   padding: 15px;
   background-color: #306134;
   color: white;
+  transition: padding .2s ease, box-shadow .4s ease;
 
   &.is-sticky {
     padding-left: 50px;
-    box-shadow: 0 0 10px black;
+    box-shadow: 0 0 10px rgba(black, 0);
   }
 }
 
-.sprinkhaan-content {
+.sprinkhaan-container .sprinkhaan-content {
   padding: 15px;
+  background-color: #f6f6d7;
 }
 
 .sprinkhaan-container .sprinkhaan-close-button {
@@ -53,5 +55,17 @@ html, body {
   &:after{
     transform-origin: top left;
     transform: translate(-50%, -50%) rotate(45deg);
+  }
+}
+
+[data-pre-sticky-header="true"] {
+  .sprinkhaan-header {
+    padding-left: 50px;
+  }
+}
+
+.sprinkhaan-container[data-sticky-header="true"] {
+  .sprinkhaan-header.is-sticky {
+    box-shadow: 0 0 10px rgba(black, 1);
   }
 }
