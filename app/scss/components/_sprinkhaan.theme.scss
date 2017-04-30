@@ -20,7 +20,7 @@ html, body {
   color: white;
 
   &.is-sticky {
-    padding-left: 45px;
+    padding-left: 50px;
     box-shadow: 0 0 10px black;
   }
 }
@@ -30,7 +30,7 @@ html, body {
 }
 
 .sprinkhaan-container .sprinkhaan-close {
-  left: 15px;
+  right: 15px;
   top: 15px;
 
   &:before, &:after {
@@ -39,8 +39,8 @@ html, body {
     left: 50%;
     content: '';
     background-color: white;
-    width: 15px;
-    height: 5px;
+    width: 16px;
+    height: 2px;
     border-radius: 4px;
   }
 

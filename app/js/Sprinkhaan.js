@@ -50,6 +50,12 @@ class Sprinkhaan extends EventEmitter {
             this.closeClick();
         });
 
+        this.touchRegion.bind(this.nonStickyHeader, 'tap', () => {
+            if (!this.animating && this.state === 'collapsed') {
+                this.animateToExpanded();
+            }
+        });
+
         this.touchRegion.bind(this.nonStickyHeader, 'swipe', (event) => {
             if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135) {
                 if (!this.animating && this.state === 'collapsed') {
