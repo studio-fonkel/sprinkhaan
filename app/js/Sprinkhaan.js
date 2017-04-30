@@ -15,6 +15,8 @@ class Sprinkhaan extends EventEmitter {
 
     easing = 'cubic-bezier(.61,.14,.5,.93)';
 
+    panningUp = false;
+
     properties = {
         state: 'collapsed',
         animating: false
@@ -67,18 +69,21 @@ class Sprinkhaan extends EventEmitter {
                     this.animateToCollapsed();
                 }
             }
-        }, true);
+        });
+
+        this.touchRegion.bind(this.element, 'pan', (event) => {
+            let panned = event.detail.data[0].distanceFromOrigin;
+
+            if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135) {
+                console.log(event.detail)
+            }
+
+            if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315) {
+
+            }
+        });
 
         this.animateToInitialCollapsed();
-    }
-
-    headerClick () {
-        if (this.state === 'collapsed') {
-            this.animateToExpanded();
-        }
-        else if (this.state === 'expanded') {
-            this.animateToCollapsed();
-        }
     }
 
     closeClick () {
@@ -159,6 +164,7 @@ class Sprinkhaan extends EventEmitter {
             duration: 330,
             easing: this.easing
         });
+
 
         animation.onfinish = () => {
           this.animating = false;
