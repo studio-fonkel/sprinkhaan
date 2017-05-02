@@ -35,7 +35,8 @@ SystemJS.config({
   },
   map: {
     "babel": "npm:babel-core@5.8.38",
-    "web-animations": "github:web-animations/web-animations-js@2.2.5"
+    "web-animations": "github:web-animations/web-animations-js@2.2.5",
+    "zingtouch": "github:zingchart/zingtouch@1.0.5"
   }
 });
 
@@ -47,7 +48,8 @@ SystemJS.config({
   ],
   map: {
     "events": "npm:jspm-nodelibs-events@0.2.0",
-    "zingtouch": "github:zingchart/zingtouch@1.0.5"
+    "web-animations/web-animations-js": "github:web-animations/web-animations-js@2.2.5",
+    "zingchart/zingtouch": "github:zingchart/zingtouch@1.0.5"
   },
   packages: {}
 });

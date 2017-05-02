@@ -6,6 +6,7 @@ class Sprinkhaan extends EventEmitter {
 
     prefix = '.sprinkhaan-';
     easing = 'cubic-bezier(.61,.14,.5,.93)';
+    // easing = 'linear';
 
     selector = '#sprinkhaan';
     element = false;
@@ -28,6 +29,7 @@ class Sprinkhaan extends EventEmitter {
 
     touchRegion = false;
     panningStartTarget = false;
+    panningStartY = false;
 
     properties = {
         state: 'hidden',
@@ -53,11 +55,15 @@ class Sprinkhaan extends EventEmitter {
 
     attachEventHandlers () {
         let panStop = () => {
+            this.panningStartY = false;
+
             if (this.isPanning) {
                 this.isPanning = false;
 
                 let percentageDone = Math.round(100 / this.animations.popup.contentWrapper.effect.activeDuration * this.animations.popup.contentWrapper._animation.currentTime);
                 const threshold = 40;
+
+                // if (percentageDone === 100) { return; } // dit geeft een nieuwe bug
 
                 if (this.state === 'collapsed') {
                     if (percentageDone > threshold) {
@@ -67,7 +73,7 @@ class Sprinkhaan extends EventEmitter {
                         this.collapse();
                     }
                 }
-                else {
+                else if (this.state === 'expanded') {
                     percentageDone = 100 - percentageDone;
 
                     if (percentageDone > threshold) {
@@ -100,21 +106,21 @@ class Sprinkhaan extends EventEmitter {
             }
         });
 
-        this.touchRegion.bind(this.elements['header.is-not-sticky'], 'swipe', (event) => {
-            if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135) {
-                if (this.state === 'collapsed') {
-                    this.expand();
-                }
-            }
-        });
-
-        this.touchRegion.bind(this.element, 'swipe', (event) => {
-            if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315) {
-                if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0) {
-                    this.collapse();
-                }
-            }
-        });
+        // this.touchRegion.bind(this.elements['header.is-not-sticky'], 'swipe', (event) => {
+        //     if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135) {
+        //         if (this.state === 'collapsed') {
+        //             this.expand();
+        //         }
+        //     }
+        // });
+        //
+        // this.touchRegion.bind(this.element, 'swipe', (event) => {
+        //     if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315) {
+        //         if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0) {
+        //             this.collapse();
+        //         }
+        //     }
+        // });
 
         this.touchRegion.bind(this.element, 'pan', (event) => {
             if (!this.isAnimating) {
@@ -125,35 +131,52 @@ class Sprinkhaan extends EventEmitter {
                     this.panningStartTarget = event.detail.events[0].originalEvent.target;
                 }
 
-                if (this.state === 'collapsed' && this.panningStartTarget === this.elements['header.is-not-sticky']) {
-
-                    if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 ||
-                        event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315
-                    ) {
-                        if (!this.isPanning) {
-                            this.isPanning = true;
-                            this.animations.popup.media.pause();
-                            this.animations.popup.contentWrapper.pause();
-                        }
-
-                        this.animations.popup.media._animation.currentTime = Math.min(this.animations.popup.media.effect.activeDuration - .1, panned);
-                        this.animations.popup.contentWrapper._animation.currentTime = Math.min(this.animations.popup.contentWrapper.effect.activeDuration - .1, panned);
-                    }
+                if(!this.panningStartY) {
+                    this.panningStartY = event.detail.events[0].clientY;
                 }
 
-                if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0) {
+                // Verschuiving in px:
+                let panOffset = event.detail.events[0].clientY - this.panningStartY;
+                // Mag niet negatief zijn:
+                let offset = (panOffset < 0 ? panOffset * -1 : panOffset);
+                // amount of ms per translating px (animation ms / movable mouse-pixels):
+                let msPerPx = this.animations.popup.media.effect.activeDuration / (window.innerHeight - this.elements['media'].offsetHeight - this.elements['header.is-not-sticky'].offsetHeight);
+                let animationPosition = offset * msPerPx;
 
-                    if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 ||
-                        event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315
-                    ) {
-                        if (!this.isPanning) {
-                            this.isPanning = true;
-                            this.animations.popup.media.pause();
-                            this.animations.popup.contentWrapper.pause();
+                if (this.state === 'collapsed' && this.panningStartTarget === this.elements['header.is-not-sticky']) {
+
+                    if (!this.isPanning) {
+                        this.isPanning = true;
+                        this.animations.popup.media.pause();
+                        this.animations.popup.contentWrapper.pause();
+                    }
+
+                    if(panOffset <= 0) {
+                        this.animations.popup.media._animation.currentTime = Math.min(this.animations.popup.media.effect.activeDuration - .1, animationPosition);
+                        this.animations.popup.contentWrapper._animation.currentTime = Math.min(this.animations.popup.contentWrapper.effect.activeDuration - .1, animationPosition);
+                    }
+                }
+                if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0 && (
+                    this.panningStartTarget === this.elements['content'] ||
+                    this.panningStartTarget === this.elements['header.is-not-sticky'] ||
+                    this.panningStartTarget === this.elements['media'])
+                ) {
+                    if (!this.isPanning) {
+                        this.isPanning = true;
+                        this.animations.popup.media.pause();
+                        this.animations.popup.contentWrapper.pause();
+                    }
+
+                    if (panOffset >= 0) {
+                        if (this.panningStartTarget === this.elements['header.is-not-sticky'] || this.panningStartTarget === this.elements['content']) {
+                            this.animations.popup.media._animation.currentTime = Math.max(0, this.animations.popup.media.effect.activeDuration - animationPosition);
+                            this.animations.popup.contentWrapper._animation.currentTime = Math.max(0, this.animations.popup.contentWrapper.effect.activeDuration - animationPosition);
+                        } else if (this.panningStartTarget === this.elements['media']) {
+                            let msPerPx = this.animations.popup.media.effect.activeDuration / (window.innerHeight - this.elements['header.is-not-sticky'].offsetHeight);
+                            let animationPosition = offset * msPerPx;
+                            this.animations.popup.media._animation.currentTime = Math.max(0, this.animations.popup.media.effect.activeDuration - animationPosition);
+                            this.animations.popup.contentWrapper._animation.currentTime = Math.max(0, this.animations.popup.contentWrapper.effect.activeDuration - animationPosition);
                         }
-
-                        this.animations.popup.media._animation.currentTime = Math.max(0, this.animations.popup.media.effect.activeDuration - panned);
-                        this.animations.popup.contentWrapper._animation.currentTime = Math.max(0, this.animations.popup.contentWrapper.effect.activeDuration - panned);
                     }
                 }
             }
