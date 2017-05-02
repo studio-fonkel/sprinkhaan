@@ -19,6 +19,8 @@ class Sprinkhaan extends EventEmitter {
         'close-button': false
     };
 
+    speed = 300;
+
     animations = {
         teaser: {},
         popup: {}
@@ -55,9 +57,10 @@ class Sprinkhaan extends EventEmitter {
                 this.isPanning = false;
 
                 let percentageDone = Math.round(100 / this.animations.popup.contentWrapper.effect.activeDuration * this.animations.popup.contentWrapper._animation.currentTime);
+                const threshold = 40;
 
                 if (this.state === 'collapsed') {
-                    if (percentageDone > 20) {
+                    if (percentageDone > threshold) {
                         this.expand();
                     }
                     else {
@@ -67,7 +70,7 @@ class Sprinkhaan extends EventEmitter {
                 else {
                     percentageDone = 100 - percentageDone;
 
-                    if (percentageDone > 20) {
+                    if (percentageDone > threshold) {
                         this.collapse();
                     }
                     else {
@@ -117,36 +120,49 @@ class Sprinkhaan extends EventEmitter {
             if (!this.isAnimating) {
                 let panned = event.detail.data[0].distanceFromOrigin;
 
+                // TODO Add math so we start the animations on the right milliseconds depending on the pixels panned.
                 if (!this.isPanning) {
                     this.panningStartTarget = event.detail.events[0].originalEvent.target;
                 }
 
-                if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 && this.state === 'collapsed' && this.panningStartTarget === this.elements['header.is-not-sticky']) {
-                    if (!this.isPanning) {
-                        this.isPanning = true;
-                        this.animations.popup.media.pause();
-                        this.animations.popup.contentWrapper.pause();
-                    }
+                if (this.state === 'collapsed' && this.panningStartTarget === this.elements['header.is-not-sticky']) {
 
-                    this.animations.popup.media._animation.currentTime = Math.min(this.animations.popup.media.effect.activeDuration - .1, panned);
-                    this.animations.popup.contentWrapper._animation.currentTime = Math.min(this.animations.popup.contentWrapper.effect.activeDuration - .1, panned);
+                    if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 ||
+                        event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315
+                    ) {
+                        if (!this.isPanning) {
+                            this.isPanning = true;
+                            this.animations.popup.media.pause();
+                            this.animations.popup.contentWrapper.pause();
+                        }
+
+                        this.animations.popup.media._animation.currentTime = Math.min(this.animations.popup.media.effect.activeDuration - .1, panned);
+                        this.animations.popup.contentWrapper._animation.currentTime = Math.min(this.animations.popup.contentWrapper.effect.activeDuration - .1, panned);
+                    }
                 }
 
-                if (event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315 && this.state === 'expanded' && this.elements['inner'].scrollTop === 0) {
-                    if (!this.isPanning) {
-                        this.isPanning = true;
-                        this.animations.popup.media.pause();
-                        this.animations.popup.contentWrapper.pause();
-                    }
+                if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0) {
 
-                    this.animations.popup.media._animation.currentTime = Math.max(0, this.animations.popup.media.effect.activeDuration - panned);
-                    this.animations.popup.contentWrapper._animation.currentTime = Math.max(0, this.animations.popup.contentWrapper.effect.activeDuration - panned);
+                    if (event.detail.data[0].currentDirection > 45 && event.detail.data[0].currentDirection < 135 ||
+                        event.detail.data[0].currentDirection > 225 && event.detail.data[0].currentDirection < 315
+                    ) {
+                        if (!this.isPanning) {
+                            this.isPanning = true;
+                            this.animations.popup.media.pause();
+                            this.animations.popup.contentWrapper.pause();
+                        }
+
+                        this.animations.popup.media._animation.currentTime = Math.max(0, this.animations.popup.media.effect.activeDuration - panned);
+                        this.animations.popup.contentWrapper._animation.currentTime = Math.max(0, this.animations.popup.contentWrapper.effect.activeDuration - panned);
+                    }
                 }
             }
         });
     }
 
     createAnimations () {
+        // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
+
         let finished = () => {
             this.isAnimating = false;
         };
@@ -157,7 +173,11 @@ class Sprinkhaan extends EventEmitter {
                 { transform: 'translateY(' + window.innerHeight + 'px) translateY(0)' },
                 { transform: 'translateY(' + window.innerHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
             ],
-            { duration: 300, fill: 'both', easing: this.easing }
+            {
+                duration: this.speed,
+                fill: 'both',
+                easing: this.easing
+            }
         );
 
         this.animations.teaser = new Animation(teaserKeyFrames, document.timeline);
@@ -169,7 +189,11 @@ class Sprinkhaan extends EventEmitter {
                 { transform: 'translateY(' + (window.innerHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
                 { transform: 'translateY(0)' }
             ],
-            { duration: 300, fill: 'both', easing: this.easing }
+            {
+                duration: this.speed,
+                fill: 'both',
+                easing: this.easing
+            }
         );
 
         this.animations.popup.media = new Animation(popupMediaKeyFrames, document.timeline);
@@ -181,7 +205,11 @@ class Sprinkhaan extends EventEmitter {
                 { transform: 'translateY(' + window.innerHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
                 { transform: 'translateY(' + this.elements['media'].clientHeight + 'px) translateY(0)' }
             ],
-            { duration: 300, fill: 'both', easing: this.easing }
+            {
+                duration: this.speed,
+                fill: 'both',
+                easing: this.easing
+            }
         );
 
         this.animations.popup.contentWrapper = new Animation(popupContentWrapperKeyFrames, document.timeline);
@@ -238,6 +266,7 @@ class Sprinkhaan extends EventEmitter {
         this.animations.popup.media.play();
         this.animations.popup.contentWrapper.play();
         this.createAnimations();
+        this.emit('open');
         return this;
     }
 
