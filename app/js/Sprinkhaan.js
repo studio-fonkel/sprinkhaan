@@ -214,6 +214,10 @@ class Sprinkhaan extends EventEmitter {
     }
 
     elementScroll () {
+        if (this.elements['inner'].scrollTop === 0) {
+            this.touchRegion.preventDefault = true;
+        }
+
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > (this.elements['media'].clientHeight - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > this.elements['media'].clientHeight;
     }
@@ -251,6 +255,7 @@ class Sprinkhaan extends EventEmitter {
         this.animations.popup.media.play();
         this.animations.popup.contentWrapper.play();
         this.emit('open');
+        this.touchRegion.preventDefault = false;
         return this;
     }
 
