@@ -20,7 +20,7 @@ class Sprinkhaan extends EventEmitter {
     };
 
     speed = 300;
-    threshold = 40;
+    threshold = 30;
 
     animations = {
         teaser: {},
@@ -110,11 +110,10 @@ class Sprinkhaan extends EventEmitter {
         this.animations.popup.contentWrapper.onfinish = finished;
     }
 
-
     attachEventHandlers () {
         this.touchRegion = new ZingTouch.Region(document.body);
-        document.body.addEventListener('touchend', () => this.panEnd());
-        document.body.addEventListener('mouseup', () => this.panEnd());
+        document.body.addEventListener('touchend', (event) => this.panEnd(event));
+        document.body.addEventListener('mouseup', (event) => this.panEnd(event));
         this.elements['inner'].addEventListener('scroll', (event) => this.elementScroll(event));
         window.addEventListener('wheel', (event) => this.wheelScroll(event));
         this.touchRegion.bind(this.elements['close-button'], 'tap', () => this.collapse());
@@ -122,28 +121,30 @@ class Sprinkhaan extends EventEmitter {
         this.touchRegion.bind(this.element, 'pan', (event) => this.pan(event));
     }
 
+    panStart (event) {
+        this.isPanning = true;
+        this.animations.popup.media.pause();
+        this.animations.popup.contentWrapper.pause();
+        this.panningStartTarget = event.detail.events[0].originalEvent.target;
+        this.panningStartY = event.detail.events[0].clientY;
+    }
+
     pan (event) {
+        let media = this.animations.popup.media;
+        let contentWrapper = this.animations.popup.contentWrapper;
+
         if (this.isAnimating) { return; }
-
-        if (!this.isPanning) {
-            this.isPanning = true;
-            this.animations.popup.media.pause();
-            this.animations.popup.contentWrapper.pause();
-            this.panningStartTarget = event.detail.events[0].originalEvent.target;
-        }
-
-        if (!this.panningStartY) {
-            this.panningStartY = event.detail.events[0].clientY;
-        }
+        if (!this.isPanning) { this.panStart(event); }
 
         let panOffset = event.detail.events[0].clientY - this.panningStartY;
-        let offset = (panOffset < 0 ? panOffset * -1 : panOffset);
-        let msPerPx = this.animations.popup.media.effect.activeDuration / (window.innerHeight - this.elements['media'].offsetHeight - this.elements['header.is-not-sticky'].offsetHeight);
+
+        let offset = Math.abs(panOffset);
+        let msPerPx = media.effect.activeDuration / (window.innerHeight - this.elements['media'].offsetHeight - this.elements['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
         if (this.state === 'collapsed' && this.panningStartTarget === this.elements['header.is-not-sticky'] && panOffset <= 0) {
-            this.animations.popup.media._animation.currentTime = Math.min(this.animations.popup.media.effect.activeDuration - .1, animationPosition);
-            this.animations.popup.contentWrapper._animation.currentTime = Math.min(this.animations.popup.contentWrapper.effect.activeDuration - .1, animationPosition);
+            media._animation.currentTime = Math.min(media.effect.activeDuration - .1, animationPosition);
+            contentWrapper._animation.currentTime = Math.min(contentWrapper.effect.activeDuration - .1, animationPosition);
         }
 
         if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0 && (
@@ -153,27 +154,34 @@ class Sprinkhaan extends EventEmitter {
             panOffset >= 0
         ) {
             if (this.panningStartTarget === this.elements['header.is-not-sticky'] || this.panningStartTarget === this.elements['content']) {
-                this.animations.popup.media._animation.currentTime = Math.max(0, this.animations.popup.media.effect.activeDuration - animationPosition);
-                this.animations.popup.contentWrapper._animation.currentTime = Math.max(0, this.animations.popup.contentWrapper.effect.activeDuration - animationPosition);
+                media._animation.currentTime = Math.max(0, media.effect.activeDuration - animationPosition);
+                contentWrapper._animation.currentTime = Math.max(0, contentWrapper.effect.activeDuration - animationPosition);
             } else if (this.panningStartTarget === this.elements['media']) {
-                let msPerPx = this.animations.popup.media.effect.activeDuration / (window.innerHeight - this.elements['header.is-not-sticky'].offsetHeight);
+                let msPerPx = media.effect.activeDuration / (window.innerHeight - this.elements['header.is-not-sticky'].offsetHeight);
                 let animationPosition = offset * msPerPx;
-                this.animations.popup.media._animation.currentTime = Math.max(0, this.animations.popup.media.effect.activeDuration - animationPosition);
-                this.animations.popup.contentWrapper._animation.currentTime = Math.max(0, this.animations.popup.contentWrapper.effect.activeDuration - animationPosition);
+                media._animation.currentTime = Math.max(0, media.effect.activeDuration - animationPosition);
+                contentWrapper._animation.currentTime = Math.max(0, contentWrapper.effect.activeDuration - animationPosition);
             }
         }
 
     }
 
-    panEnd () {
+    panEnd (event) {
         if (!this.isPanning) { return; }
-        this.panningStartY = false;
-        this.isPanning = false;
 
+        let panDirection = (event.clientY < this.panningStartY) ? 'up' : 'down';
+        this.panningStartY = false;
         let percentageDone = Math.round(100 / this.animations.popup.contentWrapper.effect.activeDuration * this.animations.popup.contentWrapper._animation.currentTime);
 
+        if (percentageDone === 100 && this.state === 'expanded' && panDirection === 'up' ||
+            percentageDone === 100 && this.state === 'expanded' && panDirection === 'down'
+        ) {
+            this.isPanning = false;
+            return;
+        }
+
         if (this.state === 'collapsed') {
-            if (percentageDone > this.threshold) {
+            if (percentageDone > this.threshold && percentageDone !== 100) {
                 this.expand();
             }
             else {
@@ -186,10 +194,12 @@ class Sprinkhaan extends EventEmitter {
             if (percentageDone > this.threshold) {
                 this.collapse();
             }
-            else {
+            else if (percentageDone !== 100) {
                 this.expand();
             }
         }
+
+        this.isPanning = false;
     }
 
     wheelScroll (event) {
@@ -236,7 +246,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     expand () {
-        if (this.state === 'expanded') { return this; }
+        if (this.isAnimating || this.state === 'expanded' && !this.isPanning) { return this; }
         this.isAnimating = true;
         this.state = 'expanded';
         this.animations.popup.media.play();
@@ -246,8 +256,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     collapse () {
-        if (this.state === 'collapsed') { return this; }
-
+        if (this.isAnimating || this.state === 'collapsed' && !this.isPanning) { return this; }
         this.scrollToTop(this.elements['inner'], () => {
             this.isAnimating = true;
             this.state = 'collapsed';

@@ -2,7 +2,8 @@ import Sprinkhaan from './Sprinkhaan.js';
 
 let sprinkhaan = new Sprinkhaan({
     selector: '#sprinkhaan',
-    speed: 700
+    // speed: 700,
+    threshold: 40
 }).show();
 
 // sprinkhaan.on('open', function () {
