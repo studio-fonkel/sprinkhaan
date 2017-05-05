@@ -15,10 +15,11 @@ body {overflow-y:hidden; }
   height: 100%;
   z-index: 1000;
   pointer-events: none;
+  -webkit-overflow-scrolling: touch;
 
   .sprinkhaan-close-button {
     position: absolute;
-    top: 5px;
+    top: 20px;
     left: 5px;
     cursor: pointer;
     width: 40px;
@@ -28,7 +29,7 @@ body {overflow-y:hidden; }
   }
 
   .sprinkhaan-inner {
-    position: fixed;
+    position: relative;
     overflow: hidden;
     height: 100%;
     width: 100%;

@@ -163,7 +163,6 @@ class Sprinkhaan extends EventEmitter {
                 contentWrapper._animation.currentTime = Math.max(0, contentWrapper.effect.activeDuration - animationPosition);
             }
         }
-
     }
 
     panEnd (event) {
