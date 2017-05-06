@@ -44,7 +44,7 @@ class Sprinkhaan extends EventEmitter {
         this.element = document.querySelector(this.selector);
         if (!this.element) { throw 'Sprinkhaan needs a valid element to function'; }
 
-        Object.keys(this.elements).forEach((subElement, delta) => {
+        Object.keys(this.elements).forEach((subElement) => {
             this.elements[subElement] = this.element.querySelector(this.prefix + subElement);
         });
 
@@ -53,11 +53,14 @@ class Sprinkhaan extends EventEmitter {
         this.attachEventHandlers();
     }
 
+    // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
     createAnimations () {
-        // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
-
         let finished = () => {
             this.isAnimating = false;
+
+            // Somehow we need to recreate the animations on each end.
+            // It could be I don't understand correctly how it works.
+            // TODO find out why.
             this.createAnimations();
         };
 
@@ -112,6 +115,8 @@ class Sprinkhaan extends EventEmitter {
 
     attachEventHandlers () {
         this.touchRegion = new ZingTouch.Region(document.body);
+        // TODO maybe use this.touchRegion.preventDefault = false; for enabling scroll inside iOs.
+
         document.body.addEventListener('touchend', (event) => this.panEnd(event));
         document.body.addEventListener('mouseup', (event) => this.panEnd(event));
         this.elements['inner'].addEventListener('scroll', (event) => this.elementScroll(event));
@@ -143,22 +148,32 @@ class Sprinkhaan extends EventEmitter {
         let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
+        // Panning up, dragging the header.
         if (this.state === 'collapsed' && this.panningStartTarget === els['header.is-not-sticky'] && panDirection === 'up') {
+            // If you pan the popup up and you let it stop at 100% the web animation starts to play again.
+            // So we want it to stop at 99.9% or the current position.
             mediaAnim._animation.currentTime = Math.min(mediaAnim.effect.activeDuration - .1, animationPosition);
             contentWrapperAnim._animation.currentTime = Math.min(contentWrapperAnim.effect.activeDuration - .1, animationPosition);
         }
 
+        // Panning down.
         if (this.state === 'expanded' && els['inner'].scrollTop === 0 && panDirection === 'down' &&
             [els['content'], els['header.is-not-sticky'], els['media']].includes(this.panningStartTarget)
         ) {
+            // Animating where the user drag the media element
             if (this.panningStartTarget === els['media']) {
+                // We need to recalculate these items for the media animation.
                 let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['header.is-not-sticky'].offsetHeight);
                 let animationPosition = offset * msPerPx;
+
+                // We want the animation to start at 0 not before it.
                 mediaAnim._animation.currentTime = Math.max(0, mediaAnim.effect.activeDuration - animationPosition);
                 contentWrapperAnim._animation.currentTime = Math.max(0, contentWrapperAnim.effect.activeDuration - animationPosition);
             }
 
+            // Animating where the user drag the header or the content element
             if ([els['content'], els['header.is-not-sticky']].includes(this.panningStartTarget)) {
+                // We want the animation to start at 0 not before it.
                 mediaAnim._animation.currentTime = Math.max(0, mediaAnim.effect.activeDuration - animationPosition);
                 contentWrapperAnim._animation.currentTime = Math.max(0, contentWrapperAnim.effect.activeDuration - animationPosition);
             }
@@ -176,6 +191,7 @@ class Sprinkhaan extends EventEmitter {
         this.panningStartY = false;
         let percentageDone = Math.round(100 / contentWrapperAnim.effect.activeDuration * contentWrapperAnim._animation.currentTime);
 
+        // No need to react.
         if (percentageDone === 100 && this.state === 'expanded' && panDirection === 'up' ||
             percentageDone === 100 && this.state === 'expanded' && panDirection === 'down'
         ) {
@@ -183,6 +199,7 @@ class Sprinkhaan extends EventEmitter {
             return;
         }
 
+        // The following logic allows the poup to close or open depending on the percentage dragged.
         if (this.state === 'collapsed') {
             if (percentageDone > this.threshold && percentageDone !== 100) {
                 this.expand();
@@ -208,21 +225,20 @@ class Sprinkhaan extends EventEmitter {
     wheelScroll (event) {
         if (this.isAnimating) { return; }
         let direction = event.deltaY < 0 ? 'down' : 'up';
+
+        // The user has a mouse and scrolls on the header.
         if (event.target === this.elements['header.is-not-sticky'] &&
             this.state === 'collapsed' && direction === 'up' && this.elements['inner'].scrollTop === 0) {
             this.expand();
         }
 
+        // If the user has a mouse en scrolls in the popup down.
         if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0 && direction === 'down') {
             this.collapse();
         }
     }
 
     elementScroll () {
-        if (this.elements['inner'].scrollTop === 0) {
-            // this.touchRegion.preventDefault = true;
-        }
-
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > (this.elements['media'].clientHeight - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > this.elements['media'].clientHeight;
     }
@@ -260,7 +276,6 @@ class Sprinkhaan extends EventEmitter {
         this.emit('open');
         this.isAnimating = true;
         this.state = 'expanded';
-        // this.touchRegion.preventDefault = false;
         return this;
     }
 
