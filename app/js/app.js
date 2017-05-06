@@ -3,7 +3,7 @@ import Sprinkhaan from './Sprinkhaan.js';
 let sprinkhaan = new Sprinkhaan({
     selector: '#sprinkhaan',
     // speed: 700,
-    threshold: 40
+    threshold: 20
 }).show();
 
 // sprinkhaan.on('open', function () {

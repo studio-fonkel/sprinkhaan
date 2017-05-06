@@ -116,7 +116,7 @@ class Sprinkhaan extends EventEmitter {
         document.body.addEventListener('mouseup', (event) => this.panEnd(event));
         this.elements['inner'].addEventListener('scroll', (event) => this.elementScroll(event));
         window.addEventListener('wheel', (event) => this.wheelScroll(event));
-        this.touchRegion.bind(this.elements['close-button'], 'tap', () => this.collapse());
+        // this.touchRegion.bind(this.elements['close-button'], 'tap', () => this.collapse());
         this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', () => this.expand());
         this.touchRegion.bind(this.element, 'pan', (event) => this.pan(event));
     }
@@ -135,20 +135,20 @@ class Sprinkhaan extends EventEmitter {
         let contentWrapperAnim = this.animations.popup.contentWrapper;
         let els = this.elements;
 
-        if (this.isAnimating) { return; }
+        if (this.isAnimating || els['inner'].scrollTop !== 0) { return; }
         if (!this.isPanning) { this.panStart(event); }
 
-        let panOffset = event.detail.events[0].clientY - this.panningStartY;
-        let offset = Math.abs(panOffset);
+        let panDirection = event.detail.events[0].clientY <= this.panningStartY ? 'up' : 'down';
+        let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
         let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
-        if (this.state === 'collapsed' && this.panningStartTarget === els['header.is-not-sticky'] && panOffset <= 0) {
+        if (this.state === 'collapsed' && this.panningStartTarget === els['header.is-not-sticky'] && panDirection === 'up') {
             mediaAnim._animation.currentTime = Math.min(mediaAnim.effect.activeDuration - .1, animationPosition);
             contentWrapperAnim._animation.currentTime = Math.min(contentWrapperAnim.effect.activeDuration - .1, animationPosition);
         }
 
-        if (this.state === 'expanded' && els['inner'].scrollTop === 0 && panOffset >= 0 &&
+        if (this.state === 'expanded' && els['inner'].scrollTop === 0 && panDirection === 'down' &&
             [els['content'], els['header.is-not-sticky'], els['media']].includes(this.panningStartTarget)
         ) {
             if (this.panningStartTarget === els['media']) {
@@ -168,6 +168,8 @@ class Sprinkhaan extends EventEmitter {
     panEnd (event) {
         let contentWrapperAnim = this.animations.popup.contentWrapper;
 
+        // TODO Panning is not correctly detected on iOs safari.
+        // It skips the following line and collapses when scrolling in the content.
         if (!this.isPanning) { return; }
 
         let panDirection = (event.clientY < this.panningStartY) ? 'up' : 'down';
@@ -258,7 +260,7 @@ class Sprinkhaan extends EventEmitter {
         this.emit('open');
         this.isAnimating = true;
         this.state = 'expanded';
-        // this.touchRegion.preventDefault = false;
+        this.touchRegion.preventDefault = false;
         return this;
     }
 
@@ -293,7 +295,7 @@ class Sprinkhaan extends EventEmitter {
     scrollToTop (element, callback) {
         if (element.scrollTop !== 0) {
             setTimeout(() => {
-                element.scrollTop = element.scrollTop - 50;
+                element.scrollTop = Math.max(element.scrollTop - 50, 0);
                 this.scrollToTop(element, callback);
             }, 1000 / 60);
         }
