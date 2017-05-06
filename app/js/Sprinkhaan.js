@@ -130,47 +130,49 @@ class Sprinkhaan extends EventEmitter {
     }
 
     pan (event) {
-        let media = this.animations.popup.media;
-        let contentWrapper = this.animations.popup.contentWrapper;
+        // Shorter references so the code below is readable.
+        let mediaAnim = this.animations.popup.media;
+        let contentWrapperAnim = this.animations.popup.contentWrapper;
+        let els = this.elements;
 
         if (this.isAnimating) { return; }
         if (!this.isPanning) { this.panStart(event); }
 
         let panOffset = event.detail.events[0].clientY - this.panningStartY;
-
         let offset = Math.abs(panOffset);
-        let msPerPx = media.effect.activeDuration / (window.innerHeight - this.elements['media'].offsetHeight - this.elements['header.is-not-sticky'].offsetHeight);
+        let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
-        if (this.state === 'collapsed' && this.panningStartTarget === this.elements['header.is-not-sticky'] && panOffset <= 0) {
-            media._animation.currentTime = Math.min(media.effect.activeDuration - .1, animationPosition);
-            contentWrapper._animation.currentTime = Math.min(contentWrapper.effect.activeDuration - .1, animationPosition);
+        if (this.state === 'collapsed' && this.panningStartTarget === els['header.is-not-sticky'] && panOffset <= 0) {
+            mediaAnim._animation.currentTime = Math.min(mediaAnim.effect.activeDuration - .1, animationPosition);
+            contentWrapperAnim._animation.currentTime = Math.min(contentWrapperAnim.effect.activeDuration - .1, animationPosition);
         }
 
-        if (this.state === 'expanded' && this.elements['inner'].scrollTop === 0 && (
-            this.panningStartTarget === this.elements['content'] ||
-            this.panningStartTarget === this.elements['header.is-not-sticky'] ||
-            this.panningStartTarget === this.elements['media']) &&
-            panOffset >= 0
+        if (this.state === 'expanded' && els['inner'].scrollTop === 0 && panOffset >= 0 &&
+            [els['content'], els['header.is-not-sticky'], els['media']].includes(this.panningStartTarget)
         ) {
-            if (this.panningStartTarget === this.elements['header.is-not-sticky'] || this.panningStartTarget === this.elements['content']) {
-                media._animation.currentTime = Math.max(0, media.effect.activeDuration - animationPosition);
-                contentWrapper._animation.currentTime = Math.max(0, contentWrapper.effect.activeDuration - animationPosition);
-            } else if (this.panningStartTarget === this.elements['media']) {
-                let msPerPx = media.effect.activeDuration / (window.innerHeight - this.elements['header.is-not-sticky'].offsetHeight);
+            if (this.panningStartTarget === els['media']) {
+                let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['header.is-not-sticky'].offsetHeight);
                 let animationPosition = offset * msPerPx;
-                media._animation.currentTime = Math.max(0, media.effect.activeDuration - animationPosition);
-                contentWrapper._animation.currentTime = Math.max(0, contentWrapper.effect.activeDuration - animationPosition);
+                mediaAnim._animation.currentTime = Math.max(0, mediaAnim.effect.activeDuration - animationPosition);
+                contentWrapperAnim._animation.currentTime = Math.max(0, contentWrapperAnim.effect.activeDuration - animationPosition);
+            }
+
+            if ([els['content'], els['header.is-not-sticky']].includes(this.panningStartTarget)) {
+                mediaAnim._animation.currentTime = Math.max(0, mediaAnim.effect.activeDuration - animationPosition);
+                contentWrapperAnim._animation.currentTime = Math.max(0, contentWrapperAnim.effect.activeDuration - animationPosition);
             }
         }
     }
 
     panEnd (event) {
+        let contentWrapperAnim = this.animations.popup.contentWrapper;
+
         if (!this.isPanning) { return; }
 
         let panDirection = (event.clientY < this.panningStartY) ? 'up' : 'down';
         this.panningStartY = false;
-        let percentageDone = Math.round(100 / this.animations.popup.contentWrapper.effect.activeDuration * this.animations.popup.contentWrapper._animation.currentTime);
+        let percentageDone = Math.round(100 / contentWrapperAnim.effect.activeDuration * contentWrapperAnim._animation.currentTime);
 
         if (percentageDone === 100 && this.state === 'expanded' && panDirection === 'up' ||
             percentageDone === 100 && this.state === 'expanded' && panDirection === 'down'
@@ -204,7 +206,8 @@ class Sprinkhaan extends EventEmitter {
     wheelScroll (event) {
         if (this.isAnimating) { return; }
         let direction = event.deltaY < 0 ? 'down' : 'up';
-        if (event.target === this.elements['header.is-not-sticky'] && this.state === 'collapsed' && direction === 'up' && this.elements['inner'].scrollTop === 0) {
+        if (event.target === this.elements['header.is-not-sticky'] &&
+            this.state === 'collapsed' && direction === 'up' && this.elements['inner'].scrollTop === 0) {
             this.expand();
         }
 
@@ -215,7 +218,7 @@ class Sprinkhaan extends EventEmitter {
 
     elementScroll () {
         if (this.elements['inner'].scrollTop === 0) {
-            this.touchRegion.preventDefault = true;
+            // this.touchRegion.preventDefault = true;
         }
 
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > (this.elements['media'].clientHeight - 50);
@@ -250,22 +253,22 @@ class Sprinkhaan extends EventEmitter {
 
     expand () {
         if (this.isAnimating || this.state === 'expanded' && !this.isPanning) { return this; }
-        this.isAnimating = true;
-        this.state = 'expanded';
         this.animations.popup.media.play();
         this.animations.popup.contentWrapper.play();
         this.emit('open');
-        this.touchRegion.preventDefault = false;
+        this.isAnimating = true;
+        this.state = 'expanded';
+        // this.touchRegion.preventDefault = false;
         return this;
     }
 
     collapse () {
         if (this.isAnimating || this.state === 'collapsed' && !this.isPanning) { return this; }
         this.scrollToTop(this.elements['inner'], () => {
-            this.isAnimating = true;
-            this.state = 'collapsed';
             this.animations.popup.media.reverse();
             this.animations.popup.contentWrapper.reverse();
+            this.isAnimating = true;
+            this.state = 'collapsed';
         });
 
         return this;
