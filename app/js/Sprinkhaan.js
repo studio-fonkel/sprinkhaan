@@ -116,7 +116,7 @@ class Sprinkhaan extends EventEmitter {
         document.body.addEventListener('mouseup', (event) => this.panEnd(event));
         this.elements['inner'].addEventListener('scroll', (event) => this.elementScroll(event));
         window.addEventListener('wheel', (event) => this.wheelScroll(event));
-        // this.touchRegion.bind(this.elements['close-button'], 'tap', () => this.collapse());
+        this.touchRegion.bind(this.elements['close-button'], 'tap', () => this.collapse());
         this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', () => this.expand());
         this.touchRegion.bind(this.element, 'pan', (event) => this.pan(event));
     }
@@ -260,7 +260,7 @@ class Sprinkhaan extends EventEmitter {
         this.emit('open');
         this.isAnimating = true;
         this.state = 'expanded';
-        this.touchRegion.preventDefault = false;
+        // this.touchRegion.preventDefault = false;
         return this;
     }
 
