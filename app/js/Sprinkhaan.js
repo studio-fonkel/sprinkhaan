@@ -115,8 +115,6 @@ class Sprinkhaan extends EventEmitter {
 
     attachEventHandlers () {
         this.touchRegion = new ZingTouch.Region(document.body);
-        // TODO maybe use this.touchRegion.preventDefault = false; for enabling scroll inside iOs.
-
         document.body.addEventListener('touchend', (event) => this.panEnd(event));
         document.body.addEventListener('mouseup', (event) => this.panEnd(event));
         this.elements['inner'].addEventListener('scroll', (event) => this.elementScroll(event));
@@ -151,6 +149,7 @@ class Sprinkhaan extends EventEmitter {
         if (!this.isPanning) { this.panStart(event); }
 
         let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
+
         let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
@@ -189,11 +188,11 @@ class Sprinkhaan extends EventEmitter {
     panEnd (event) {
         let contentWrapperAnim = this.animations.popup.contentWrapper;
 
-        // TODO Panning is not correctly detected on iOs safari.
         // It skips the following line and collapses when scrolling in the content.
         if (!this.isPanning) { return; }
 
-        let panDirection = (event.clientY < this.panningStartY) ? 'up' : 'down';
+        let clientY = (event.clientY !== undefined) ? event.clientY : event.changedTouches[0].clientY;
+        let panDirection = (clientY < this.panningStartY) ? 'up' : 'down';
         this.panningStartY = false;
         let percentageDone = Math.round(100 / contentWrapperAnim.effect.activeDuration * contentWrapperAnim._animation.currentTime);
 
@@ -207,7 +206,7 @@ class Sprinkhaan extends EventEmitter {
 
         // The following logic allows the poup to close or open depending on the percentage dragged.
         if (this.state === 'collapsed') {
-            if (percentageDone > this.threshold && percentageDone !== 100) {
+            if (percentageDone > this.threshold) {
                 this.expand();
             }
             else {
@@ -220,7 +219,7 @@ class Sprinkhaan extends EventEmitter {
             if (percentageDone > this.threshold) {
                 this.collapse();
             }
-            else if (percentageDone !== 100) {
+            else {
                 this.expand();
             }
         }
@@ -283,12 +282,14 @@ class Sprinkhaan extends EventEmitter {
         this.isAnimating = true;
         this.touchRegion.preventDefault = false;
         this.state = 'expanded';
+        console.log('expand')
         return this;
     }
 
     collapse () {
         if (this.isAnimating || this.state === 'collapsed' && !this.isPanning) { return this; }
         this.scrollToTop(this.elements['inner'], () => {
+            console.log('collapse')
             this.animations.popup.media.reverse();
             this.animations.popup.contentWrapper.reverse();
             this.touchRegion.preventDefault = true;
