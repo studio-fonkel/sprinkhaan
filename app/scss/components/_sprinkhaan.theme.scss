@@ -15,6 +15,17 @@ html, body {
   box-sizing: border-box;
 }
 
+
+@media screen and (min-width: 680px) {
+  .sprinkhaan-container {
+    left: 40px;
+    max-width: 600px;
+    top: 200px;
+    bottom: 0;
+    height: calc(100% - 200px);
+  }
+}
+
 .sprinkhaan-header {
   padding: 30px 15px;
   background-color: #306134;

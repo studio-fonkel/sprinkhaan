@@ -71,8 +71,8 @@ class Sprinkhaan extends EventEmitter {
         let teaserKeyFrames = new KeyframeEffect(
             this.elements['content-wrapper'],
             [
-                { transform: 'translateY(' + window.innerHeight + 'px) translateY(0)' },
-                { transform: 'translateY(' + window.innerHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
+                { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(0)' },
+                { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
             ],
             {
                 duration: this.speed,
@@ -87,7 +87,7 @@ class Sprinkhaan extends EventEmitter {
         let popupMediaKeyFrames = new KeyframeEffect(
             this.elements['media'],
             [
-                { transform: 'translateY(' + (window.innerHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
+                { transform: 'translateY(' + (this.element.clientHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
                 { transform: 'translateY(0)' }
             ],
             {
@@ -103,7 +103,7 @@ class Sprinkhaan extends EventEmitter {
         let popupContentWrapperKeyFrames = new KeyframeEffect(
             this.elements['content-wrapper'],
             [
-                { transform: 'translateY(' + window.innerHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
+                { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
                 { transform: 'translateY(' + this.elements['media'].clientHeight + 'px) translateY(0)' }
             ],
             {
@@ -167,6 +167,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     pan (event) {
+        // TODO Android tablet portrait mode has panning horizontal instead of vertical, so we need to take device orientation into account.
         // Shorter references so the code below is readable.
         let mediaAnim = this.animations.popup.media;
         let contentWrapperAnim = this.animations.popup.contentWrapper;
@@ -184,7 +185,7 @@ class Sprinkhaan extends EventEmitter {
 
         let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
 
-        let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
+        let msPerPx = mediaAnim.effect.activeDuration / (this.element.clientHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
         // Panning up, dragging the header.
@@ -202,7 +203,7 @@ class Sprinkhaan extends EventEmitter {
             // Animating where the user drag the media element
             if (this.panningStartTarget === els['media']) {
                 // We need to recalculate these items for the media animation.
-                let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['header.is-not-sticky'].offsetHeight);
+                let msPerPx = mediaAnim.effect.activeDuration / (this.element.clientHeight - els['header.is-not-sticky'].offsetHeight);
                 let animationPosition = offset * msPerPx;
 
                 // We want the animation to start at 0 not before it.
