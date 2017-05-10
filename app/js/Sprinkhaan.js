@@ -29,7 +29,7 @@ class Sprinkhaan extends EventEmitter {
 
     boundEvents = {};
 
-    touchRegion = false;
+    touchRegion = undefined;
     panningStartTarget = false;
     panningStartY = false;
 
@@ -66,6 +66,8 @@ class Sprinkhaan extends EventEmitter {
             this.createAnimations();
         };
 
+
+        // TODO we need to animate the media also in this animation, else it will be on the wrong place when calling hide().
         let teaserKeyFrames = new KeyframeEffect(
             this.elements['content-wrapper'],
             [
@@ -310,6 +312,7 @@ class Sprinkhaan extends EventEmitter {
         if (this.isAnimating || this.state === 'expanded' && !this.isPanning) { return this; }
         this.animations.popup.media.play();
         this.animations.popup.contentWrapper.play();
+        // TODO this emit needs to fire when done with animating.
         this.emit('open');
         this.isAnimating = true;
         this.touchRegion.preventDefault = false;
@@ -323,6 +326,7 @@ class Sprinkhaan extends EventEmitter {
             this.animations.popup.media.reverse();
             this.animations.popup.contentWrapper.reverse();
             this.touchRegion.preventDefault = true;
+            // TODO Needs an emit that fires when done with animating.
             this.isAnimating = true;
             this.state = 'collapsed';
         });
