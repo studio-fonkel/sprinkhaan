@@ -138,12 +138,18 @@ class Sprinkhaan extends EventEmitter {
         // Shorter references so the code below is readable.
         let mediaAnim = this.animations.popup.media;
         let contentWrapperAnim = this.animations.popup.contentWrapper;
-        let els = this.elements;
+        let panDirection = event.detail.events[0].clientY <= this.panningStartY ? 'up' : 'down';
 
+        let els = this.elements;
         if (this.isAnimating || els['inner'].scrollTop !== 0) { return; }
+
+        // Switching from expanding/collapsing to scrolling in the popup.
+        if (panDirection === 'up' && els['inner'].scrollTop === 0 && this.state === 'expanded') {
+            return;
+        }
+
         if (!this.isPanning) { this.panStart(event); }
 
-        let panDirection = event.detail.events[0].clientY <= this.panningStartY ? 'up' : 'down';
         let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
         let msPerPx = mediaAnim.effect.activeDuration / (window.innerHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
@@ -275,6 +281,7 @@ class Sprinkhaan extends EventEmitter {
         this.animations.popup.contentWrapper.play();
         this.emit('open');
         this.isAnimating = true;
+        this.touchRegion.preventDefault = false;
         this.state = 'expanded';
         return this;
     }
@@ -284,6 +291,7 @@ class Sprinkhaan extends EventEmitter {
         this.scrollToTop(this.elements['inner'], () => {
             this.animations.popup.media.reverse();
             this.animations.popup.contentWrapper.reverse();
+            this.touchRegion.preventDefault = true;
             this.isAnimating = true;
             this.state = 'collapsed';
         });
