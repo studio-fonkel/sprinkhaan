@@ -27,6 +27,8 @@ class Sprinkhaan extends EventEmitter {
         popup: {}
     };
 
+    boundEvents = {};
+
     touchRegion = false;
     panningStartTarget = false;
     panningStartY = false;
@@ -115,13 +117,43 @@ class Sprinkhaan extends EventEmitter {
 
     attachEventHandlers () {
         this.touchRegion = new ZingTouch.Region(document.body);
-        document.body.addEventListener('touchend', (event) => this.panEnd(event));
-        document.body.addEventListener('mouseup', (event) => this.panEnd(event));
-        this.elements['inner'].addEventListener('scroll', (event) => this.elementScroll(event));
-        window.addEventListener('wheel', (event) => this.wheelScroll(event));
         this.touchRegion.bind(this.elements['close-button'], 'tap', () => this.collapse());
         this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', () => this.expand());
         this.touchRegion.bind(this.element, 'pan', (event) => this.pan(event));
+
+        // These handlers need unbind, see destroy().
+        this.boundEvents = {
+            resize: (event) => this.resizeWindow(event),
+            orientationchange: (event) => this.resizeWindow(event),
+            touchend: (event) => this.panEnd(event),
+            mouseup: (event) => this.panEnd(event),
+            scroll: (event) => this.elementScroll(event),
+            wheel: (event) => this.wheelScroll(event),
+        };
+
+        window.addEventListener('resize', this.boundEvents.resize);
+        window.addEventListener('orientationchange', this.boundEvents.orientationchange);
+        document.body.addEventListener('touchend', this.boundEvents.touchend);
+        document.body.addEventListener('mouseup', this.boundEvents.mouseup);
+        this.elements['inner'].addEventListener('scroll', this.boundEvents.scroll);
+        window.addEventListener('wheel', this.boundEvents.wheel);
+    }
+
+    resizeWindow () {
+        this.animations.popup.media.pause();
+        this.animations.popup.contentWrapper.pause();
+
+        if (this.state === 'collapsed') {
+            this.animations.popup.media._animation.currentTime = 0;
+            this.animations.popup.contentWrapper._animation.currentTime = 0;
+        }
+
+        if (this.state === 'expanded') {
+            this.animations.popup.media._animation.currentTime = 300;
+            this.animations.popup.contentWrapper._animation.currentTime = 300;
+        }
+
+        this.createAnimations();
     }
 
     panStart (event) {
@@ -228,6 +260,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     wheelScroll (event) {
+        console.log('woops')
         if (this.isAnimating) { return; }
         let direction = event.deltaY < 0 ? 'down' : 'up';
 
@@ -282,14 +315,12 @@ class Sprinkhaan extends EventEmitter {
         this.isAnimating = true;
         this.touchRegion.preventDefault = false;
         this.state = 'expanded';
-        console.log('expand')
         return this;
     }
 
     collapse () {
         if (this.isAnimating || this.state === 'collapsed' && !this.isPanning) { return this; }
         this.scrollToTop(this.elements['inner'], () => {
-            console.log('collapse')
             this.animations.popup.media.reverse();
             this.animations.popup.contentWrapper.reverse();
             this.touchRegion.preventDefault = true;
@@ -307,13 +338,25 @@ class Sprinkhaan extends EventEmitter {
     }
 
     hide () {
+        // TODO needs to work when state === 'expanded';
         this.animations.teaser.reverse();
         this.state = 'hidden';
         return this;
     }
 
     destroy () {
+        // TODO this hide needs to be triggered when collapsed is finished with animating.
+        this.collapse().hide();
+        this.touchRegion.unbind(this.elements['close-button']);
+        this.touchRegion.unbind(this.elements['header.is-not-sticky']);
+        this.touchRegion.unbind(this.element);
 
+        window.removeEventListener('resize', this.boundEvents.resize);
+        window.removeEventListener('orientationchange', this.boundEvents.orientationchange);
+        document.body.removeEventListener('touchend', this.boundEvents.touchend);
+        document.body.removeEventListener('mouseup', this.boundEvents.mouseup);
+        this.elements['inner'].removeEventListener('scroll', this.boundEvents.scroll);
+        window.removeEventListener('wheel', this.boundEvents.wheel);
     }
 
     scrollToTop (element, callback) {
