@@ -260,7 +260,6 @@ class Sprinkhaan extends EventEmitter {
     }
 
     wheelScroll (event) {
-        console.log('woops')
         if (this.isAnimating) { return; }
         let direction = event.deltaY < 0 ? 'down' : 'up';
 
