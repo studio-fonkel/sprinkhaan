@@ -280,6 +280,9 @@ class Sprinkhaan extends EventEmitter {
     }
 
     elementScroll () {
+        if (this.isAnimating) {
+            this.elements['inner'].scrollTop = 0;
+        }
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > (this.elements['media'].clientHeight - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > this.elements['media'].clientHeight;
     }
