@@ -835,6 +835,10 @@
     overrideNative(String.prototype, 'includes', StringPrototypeShims.includes);
   }
 
+    if (!Array.prototype.includes) {
+      Array.prototype.includes = StringPrototypeShims.includes;
+    }
+
   if (String.prototype.startsWith && String.prototype.endsWith) {
     var startsWithRejectsRegex = throwsError(function () {
       /* throws if spec-compliant */
