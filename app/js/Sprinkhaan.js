@@ -54,7 +54,7 @@ class Sprinkhaan extends EventEmitter {
         this.elements['content'].style.marginTop = this.elements['header.is-not-sticky'].clientHeight + 'px';
         this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + this.elements['media'].clientHeight) + 'px';
         this.createAnimations();
-        this.attachEventHandlers();
+        this.attachEventListeners();
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
@@ -102,7 +102,7 @@ class Sprinkhaan extends EventEmitter {
         ]);
     }
 
-    attachEventHandlers () {
+    attachEventListeners () {
         this.touchRegion = new ZingTouch.Region(document.body);
         this.touchRegion.bind(this.elements['close-button'], 'tap', () => this.collapse());
         this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', () => this.expand());
@@ -214,7 +214,7 @@ class Sprinkhaan extends EventEmitter {
             return;
         }
 
-        // The following logic allows the poup to close or open depending on the percentage dragged.
+        // The following logic allows the popup to close or open depending on the percentage dragged.
         if (this.state === 'collapsed') {
             if (percentageDone > this.threshold) {
                 this.expand();
@@ -287,78 +287,100 @@ class Sprinkhaan extends EventEmitter {
         this.properties.isPanning = state;
     }
 
-    expand () {
-        if (this.isAnimating || this.state === 'expanded' && !this.isPanning) { return this; }
+    expand (callback) {
+        if (this.isAnimating || this.state === 'expanded' && !this.isPanning) {
+            if (typeof callback === 'function') {
+                callback();
+            }
+            return this;
+        }
         this.isAnimating = true;
         this.touchRegion.preventDefault = false;
         this.animations.popup.play()
         .once('finished', () => {
-            this.emit('expanded');
             this.state = 'expanded';
+            this.emit('expanded');
+            if (typeof callback === 'function') {
+                callback();
+            }
         });
 
         return this;
     }
 
-    collapse () {
-        if (this.isAnimating || this.state === 'collapsed' && !this.isPanning) { return this; }
+    collapse (callback) {
+        if (this.isAnimating || this.state === 'collapsed' && !this.isPanning) {
+            if (typeof callback === 'function') {
+                callback();
+            }
+            return this;
+        }
         this.scrollToTop(this.elements['inner'], () => {
             this.isAnimating = true;
             this.animations.popup.reverse()
             .once('finished', () => {
-                this.emit('collapsed');
                 this.state = 'collapsed';
                 this.touchRegion.preventDefault = true;
+                this.emit('collapsed');
+                if (typeof callback === 'function') {
+                    callback();
+                }
             });
         });
 
         return this;
     }
 
-    show () {
+    show (callback) {
         this.animations.teaser.play()
         .once('finished', () => {
             this.state = 'collapsed';
             this.emit('collapsed');
+            if (typeof callback === 'function') {
+                callback();
+            }
         });
 
         return this;
     }
 
-    hide () {
+    hide (callback) {
         this.animations.teaser.reverse()
         .once('finished', () => {
             this.emit('hidden');
             this.state = 'hidden';
+            if (typeof callback === 'function') {
+                callback();
+            }
         });
 
         return this;
     }
 
-    destroy () {
-        let continueFlow = () => {
-            this.once('hidden', () => {
-                this.touchRegion.unbind(this.elements['close-button']);
-                this.touchRegion.unbind(this.elements['header.is-not-sticky']);
-                this.touchRegion.unbind(this.element);
+    detachEventListeners () {
+        this.touchRegion.unbind(this.elements['close-button']);
+        this.touchRegion.unbind(this.elements['header.is-not-sticky']);
+        this.touchRegion.unbind(this.element);
 
-                window.removeEventListener('resize', this.boundEvents.resize);
-                window.removeEventListener('orientationchange', this.boundEvents.orientationchange);
-                document.body.removeEventListener('touchend', this.boundEvents.touchend);
-                document.body.removeEventListener('mouseup', this.boundEvents.mouseup);
-                this.elements['inner'].removeEventListener('scroll', this.boundEvents.scroll);
-                window.removeEventListener('wheel', this.boundEvents.wheel);
+        window.removeEventListener('resize', this.boundEvents.resize);
+        window.removeEventListener('orientationchange', this.boundEvents.orientationchange);
+        document.body.removeEventListener('touchend', this.boundEvents.touchend);
+        document.body.removeEventListener('mouseup', this.boundEvents.mouseup);
+        this.elements['inner'].removeEventListener('scroll', this.boundEvents.scroll);
+        window.removeEventListener('wheel', this.boundEvents.wheel);
+
+        this.emit('destroyed');
+    }
+
+    destroy (callback) {
+        this.collapse(() => {
+            this.hide(() => {
+                this.detachEventListeners();
+                if (typeof callback === 'function') {
+                    callback();
+                }
             });
-            this.hide()
-        };
-
-        if (this.state === 'expanded') {
-            this.once('collapsed', continueFlow);
-            this.collapse();
-        }
-        else {
-            continueFlow();
-        }
+        });
     }
 
     scrollToTop (element, callback) {
