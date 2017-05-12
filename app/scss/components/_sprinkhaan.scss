@@ -43,7 +43,7 @@ body {overflow-y:hidden; }
 
   .sprinkhaan-media {
     width: 100%;
-    transform: translateY(100vh);
+    transform: translateY(9999px); // Moves it initially off screen, js fixes afterwards.
     left: 0;
     position: relative;
     padding-bottom: 57%;
@@ -66,7 +66,7 @@ body {overflow-y:hidden; }
   }
 
   .sprinkhaan-content-wrapper {
-    transform: translateY(100vh);
+    transform: translateY(9999px); // Moves it initially off screen, js fixes afterwards.
     pointer-events: auto;
     position: absolute;
     left: 0;

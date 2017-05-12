@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import 'web-animations/web-animations-next.min';
 import ZingTouch from 'zingtouch';
+import SprinkhaanAnimation from './SprinkhaanAnimation.js';
 
 class Sprinkhaan extends EventEmitter {
 
@@ -67,55 +68,38 @@ class Sprinkhaan extends EventEmitter {
             this.createAnimations();
         };
 
+        let animationOptions = {
+            duration: this.speed,
+            fill: 'both',
+            easing: this.easing
+        };
 
-        // TODO we need to animate the media also in this animation, else it will be on the wrong place when calling hide().
-        let teaserKeyFrames = new KeyframeEffect(
-            this.elements['content-wrapper'],
-            [
-                { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(0)' },
-                { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
-            ],
-            {
-                duration: this.speed,
-                fill: 'both',
-                easing: this.easing
-            }
-        );
+        this.animations.teaser = new SprinkhaanAnimation(animationOptions);
+        this.animations.popup = new SprinkhaanAnimation(animationOptions);
 
-        this.animations.teaser = new Animation(teaserKeyFrames, document.timeline);
-        this.animations.teaser.onfinish = finished;
+        this.animations.teaser.on('finished', finished);
+        this.animations.popup.on('finished', finished);
 
-        let popupMediaKeyFrames = new KeyframeEffect(
-            this.elements['media'],
-            [
-                { transform: 'translateY(' + (this.element.clientHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
-                { transform: 'translateY(0)' }
-            ],
-            {
-                duration: this.speed,
-                fill: 'both',
-                easing: this.easing
-            }
-        );
+        // This one simply hides the media object from appearing when using the hide method.
+        this.animations.teaser.addKeyframeEffect(this.elements['media'], [
+            { transform: 'translateY(' + this.element.clientHeight + 'px)' },
+            { transform: 'translateY(' + this.element.clientHeight + 'px)' }
+        ]);
 
-        this.animations.popup.media = new Animation(popupMediaKeyFrames, document.timeline);
-        this.animations.popup.media.onfinish = finished;
+        this.animations.teaser.addKeyframeEffect(this.elements['content-wrapper'], [
+            { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(0)' },
+            { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
+        ]);
 
-        let popupContentWrapperKeyFrames = new KeyframeEffect(
-            this.elements['content-wrapper'],
-            [
-                { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
-                { transform: 'translateY(' + this.elements['media'].clientHeight + 'px) translateY(0)' }
-            ],
-            {
-                duration: this.speed,
-                fill: 'both',
-                easing: this.easing
-            }
-        );
+        this.animations.popup.addKeyframeEffect(this.elements['media'], [
+            { transform: 'translateY(' + (this.element.clientHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
+            { transform: 'translateY(0)' }
+        ]);
 
-        this.animations.popup.contentWrapper = new Animation(popupContentWrapperKeyFrames, document.timeline);
-        this.animations.popup.contentWrapper.onfinish = finished;
+        this.animations.popup.addKeyframeEffect(this.elements['content-wrapper'], [
+            { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
+            { transform: 'translateY(' + this.elements['media'].clientHeight + 'px) translateY(0)' }
+        ]);
     }
 
     attachEventHandlers () {
@@ -139,21 +123,18 @@ class Sprinkhaan extends EventEmitter {
         document.body.addEventListener('touchend', this.boundEvents.touchend);
         document.body.addEventListener('mouseup', this.boundEvents.mouseup);
         this.elements['inner'].addEventListener('scroll', this.boundEvents.scroll);
-        window.addEventListener('wheel', this.boundEvents.wheel);
+        window.addEventListener('wheel', this.boundEvents.wheel, { passive: true });
     }
 
     resizeWindow () {
-        this.animations.popup.media.pause();
-        this.animations.popup.contentWrapper.pause();
+        this.animations.popup.pause();
 
         if (this.state === 'collapsed') {
-            this.animations.popup.media._animation.currentTime = 0;
-            this.animations.popup.contentWrapper._animation.currentTime = 0;
+            this.animations.popup.currentTime = 0;
         }
 
         if (this.state === 'expanded') {
-            this.animations.popup.media._animation.currentTime = 300;
-            this.animations.popup.contentWrapper._animation.currentTime = 300;
+            this.animations.popup.currentTime = 300;
         }
 
         this.createAnimations();
@@ -161,8 +142,7 @@ class Sprinkhaan extends EventEmitter {
 
     panStart (event) {
         this.isPanning = true;
-        this.animations.popup.media.pause();
-        this.animations.popup.contentWrapper.pause();
+        this.animations.popup.pause();
         this.panningStartTarget = event.detail.events[0].originalEvent.target;
         this.panningStartY = event.detail.events[0].clientY;
     }
@@ -170,8 +150,7 @@ class Sprinkhaan extends EventEmitter {
     pan (event) {
         // TODO Android tablet portrait mode has panning horizontal instead of vertical, so we need to take device orientation into account.
         // Shorter references so the code below is readable.
-        let mediaAnim = this.animations.popup.media;
-        let contentWrapperAnim = this.animations.popup.contentWrapper;
+        let popupAnimation = this.animations.popup;
         let panDirection = event.detail.events[0].clientY <= this.panningStartY ? 'up' : 'down';
 
         let els = this.elements;
@@ -186,15 +165,14 @@ class Sprinkhaan extends EventEmitter {
 
         let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
 
-        let msPerPx = mediaAnim.effect.activeDuration / (this.element.clientHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
+        let msPerPx = popupAnimation.activeDuration / (this.element.clientHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
         // Panning up, dragging the header.
         if (this.state === 'collapsed' && this.panningStartTarget === els['header.is-not-sticky'] && panDirection === 'up') {
             // If you pan the popup up and you let it stop at 100% the web animation starts to play again.
             // So we want it to stop at 99.9% or the current position.
-            mediaAnim._animation.currentTime = Math.min(mediaAnim.effect.activeDuration - .1, animationPosition);
-            contentWrapperAnim._animation.currentTime = Math.min(contentWrapperAnim.effect.activeDuration - .1, animationPosition);
+            popupAnimation.currentTime = Math.min(popupAnimation.activeDuration - .1, animationPosition);
         }
 
         // Panning down.
@@ -204,33 +182,29 @@ class Sprinkhaan extends EventEmitter {
             // Animating where the user drag the media element
             if (this.panningStartTarget === els['media']) {
                 // We need to recalculate these items for the media animation.
-                let msPerPx = mediaAnim.effect.activeDuration / (this.element.clientHeight - els['header.is-not-sticky'].offsetHeight);
+                let msPerPx = popupAnimation.activeDuration / (this.element.clientHeight - els['header.is-not-sticky'].offsetHeight);
                 let animationPosition = offset * msPerPx;
 
                 // We want the animation to start at 0 not before it.
-                mediaAnim._animation.currentTime = Math.max(0, mediaAnim.effect.activeDuration - animationPosition);
-                contentWrapperAnim._animation.currentTime = Math.max(0, contentWrapperAnim.effect.activeDuration - animationPosition);
+                popupAnimation.currentTime = Math.max(0, popupAnimation.activeDuration - animationPosition);
             }
 
             // Animating where the user drag the header or the content element
             if ([els['content'], els['header.is-not-sticky']].includes(this.panningStartTarget)) {
                 // We want the animation to start at 0 not before it.
-                mediaAnim._animation.currentTime = Math.max(0, mediaAnim.effect.activeDuration - animationPosition);
-                contentWrapperAnim._animation.currentTime = Math.max(0, contentWrapperAnim.effect.activeDuration - animationPosition);
+                popupAnimation.currentTime = Math.max(0, popupAnimation.activeDuration - animationPosition);
             }
         }
     }
 
     panEnd (event) {
-        let contentWrapperAnim = this.animations.popup.contentWrapper;
-
         // It skips the following line and collapses when scrolling in the content.
         if (!this.isPanning) { return; }
 
         let clientY = (event.clientY !== undefined) ? event.clientY : event.changedTouches[0].clientY;
         let panDirection = (clientY < this.panningStartY) ? 'up' : 'down';
         this.panningStartY = false;
-        let percentageDone = Math.round(100 / contentWrapperAnim.effect.activeDuration * contentWrapperAnim._animation.currentTime);
+        let percentageDone = Math.round(100 / this.animations.popup.activeDuration * this.animations.popup.currentTime);
 
         // No need to react.
         if (percentageDone === 100 && this.state === 'expanded' && panDirection === 'up' ||
@@ -315,56 +289,76 @@ class Sprinkhaan extends EventEmitter {
 
     expand () {
         if (this.isAnimating || this.state === 'expanded' && !this.isPanning) { return this; }
-        this.animations.popup.media.play();
-        this.animations.popup.contentWrapper.play();
-        // TODO this emit needs to fire when done with animating.
-        this.emit('open');
         this.isAnimating = true;
         this.touchRegion.preventDefault = false;
-        this.state = 'expanded';
+        this.animations.popup.play()
+        .once('finished', () => {
+            this.emit('expanded');
+            this.state = 'expanded';
+        });
+
         return this;
     }
 
     collapse () {
         if (this.isAnimating || this.state === 'collapsed' && !this.isPanning) { return this; }
         this.scrollToTop(this.elements['inner'], () => {
-            this.animations.popup.media.reverse();
-            this.animations.popup.contentWrapper.reverse();
-            this.touchRegion.preventDefault = true;
-            // TODO Needs an emit that fires when done with animating.
             this.isAnimating = true;
-            this.state = 'collapsed';
+            this.animations.popup.reverse()
+            .once('finished', () => {
+                this.emit('collapsed');
+                this.state = 'collapsed';
+                this.touchRegion.preventDefault = true;
+            });
         });
 
         return this;
     }
 
     show () {
-        this.state = 'collapsed';
-        this.animations.teaser.play();
+        this.animations.teaser.play()
+        .once('finished', () => {
+            this.state = 'collapsed';
+            this.emit('collapsed');
+        });
+
         return this;
     }
 
     hide () {
-        // TODO needs to work when state === 'expanded';
-        this.animations.teaser.reverse();
-        this.state = 'hidden';
+        this.animations.teaser.reverse()
+        .once('finished', () => {
+            this.emit('hidden');
+            this.state = 'hidden';
+        });
+
         return this;
     }
 
     destroy () {
-        // TODO this hide needs to be triggered when collapsed is finished with animating.
-        this.collapse().hide();
-        this.touchRegion.unbind(this.elements['close-button']);
-        this.touchRegion.unbind(this.elements['header.is-not-sticky']);
-        this.touchRegion.unbind(this.element);
+        let continueFlow = () => {
+            this.once('hidden', () => {
+                this.touchRegion.unbind(this.elements['close-button']);
+                this.touchRegion.unbind(this.elements['header.is-not-sticky']);
+                this.touchRegion.unbind(this.element);
 
-        window.removeEventListener('resize', this.boundEvents.resize);
-        window.removeEventListener('orientationchange', this.boundEvents.orientationchange);
-        document.body.removeEventListener('touchend', this.boundEvents.touchend);
-        document.body.removeEventListener('mouseup', this.boundEvents.mouseup);
-        this.elements['inner'].removeEventListener('scroll', this.boundEvents.scroll);
-        window.removeEventListener('wheel', this.boundEvents.wheel);
+                window.removeEventListener('resize', this.boundEvents.resize);
+                window.removeEventListener('orientationchange', this.boundEvents.orientationchange);
+                document.body.removeEventListener('touchend', this.boundEvents.touchend);
+                document.body.removeEventListener('mouseup', this.boundEvents.mouseup);
+                this.elements['inner'].removeEventListener('scroll', this.boundEvents.scroll);
+                window.removeEventListener('wheel', this.boundEvents.wheel);
+            });
+            this.hide()
+        };
+
+        if (this.state === 'expanded') {
+            this.once('collapsed', continueFlow);
+            this.collapse();
+        }
+        else {
+            continueFlow();
+        }
     }
 
     scrollToTop (element, callback) {
