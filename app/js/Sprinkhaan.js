@@ -52,7 +52,7 @@ class Sprinkhaan extends EventEmitter {
         });
 
         this.elements['content'].style.marginTop = this.elements['header.is-not-sticky'].clientHeight + 'px';
-        this.element.style.height = Math.min(window.innerHeight, this.elements['content-wrapper'].clientHeight + this.elements['media'].clientHeight + 'px');
+        this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + this.elements['media'].clientHeight) + 'px';
         this.createAnimations();
         this.attachEventHandlers();
     }
