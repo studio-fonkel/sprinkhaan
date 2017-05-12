@@ -373,9 +373,10 @@ class Sprinkhaan extends EventEmitter {
     }
 
     destroy (callback) {
+        this.detachEventListeners();
+
         this.collapse(() => {
             this.hide(() => {
-                this.detachEventListeners();
                 if (typeof callback === 'function') {
                     callback();
                 }
