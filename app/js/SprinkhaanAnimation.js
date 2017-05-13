@@ -1,23 +1,9 @@
 import EventEmitter from 'events';
 import 'web-animations/web-animations-next.min';
 
-function debounce(func, wait, immediate) {
-    var timeout;
-    return function() {
-        var context = this, args = arguments;
-        var later = function() {
-            timeout = null;
-            if (!immediate) func.apply(context, args);
-        };
-        var callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) func.apply(context, args);
-    };
-};
-
 class SprinkhaanAnimation extends EventEmitter {
 
+    currentFinished = 0;
     animations = [];
     animationOptions = {};
 
@@ -30,11 +16,14 @@ class SprinkhaanAnimation extends EventEmitter {
         let keyframeEffect = new KeyframeEffect(element, frames, this.animationOptions);
         let animation = new Animation(keyframeEffect, document.timeline);
 
-        let finishedEmitter = () => {
-          this.emit('finished')
-        };
+        animation.onfinish = () => {
+            this.currentFinished++;
 
-        animation.onfinish = debounce(finishedEmitter, 300);
+            if (this.currentFinished === this.animations.length) {
+                this.currentFinished = 0;
+                this.emit('finished')
+            }
+        };
 
         this.animations.push(animation);
     }
