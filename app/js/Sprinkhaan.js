@@ -253,7 +253,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     elementScroll () {
-        if (this.isAnimating) {
+        if (this.isAnimating && !this.isScrollingToTop) {
             this.elements['inner'].scrollTop = 0;
         }
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > (this.elements['media'].clientHeight - 50);
@@ -295,15 +295,16 @@ class Sprinkhaan extends EventEmitter {
         }
 
         this.isAnimating = true;
+        this.state = 'expanded';
         this.touchRegion.preventDefault = false;
-        this.animations.popup.play()
-        .once('finished', () => {
-            this.state = 'expanded';
+        this.animations.popup.once('finished', () => {
             this.emit('expanded');
             if (typeof callback === 'function') {
                 callback();
             }
         });
+
+        this.animations.popup.play();
 
         return this;
     }
@@ -316,10 +317,10 @@ class Sprinkhaan extends EventEmitter {
             return this;
         }
 
+        this.isAnimating = true;
+
         this.scrollToTop(this.elements['inner'], () => {
-            this.isAnimating = true;
-            this.animations.popup.reverse()
-            .once('finished', () => {
+            this.animations.popup.once('finished', () => {
                 this.touchRegion.preventDefault = true;
                 this.state = 'collapsed';
                 this.emit('collapsed');
@@ -327,14 +328,15 @@ class Sprinkhaan extends EventEmitter {
                     callback();
                 }
             });
+
+            this.animations.popup.reverse();
         });
 
         return this;
     }
 
     show (callback) {
-        this.animations.teaser.play()
-        .once('finished', () => {
+        this.animations.teaser.once('finished', () => {
             this.state = 'collapsed';
             this.emit('collapsed');
             if (typeof callback === 'function') {
@@ -342,18 +344,21 @@ class Sprinkhaan extends EventEmitter {
             }
         });
 
+        this.animations.teaser.play();
+
         return this;
     }
 
     hide (callback) {
-        this.animations.teaser.reverse()
-        .once('finished', () => {
+        this.animations.teaser.once('finished', () => {
             this.emit('hidden');
             this.state = 'hidden';
             if (typeof callback === 'function') {
                 callback();
             }
         });
+
+        this.animations.teaser.reverse();
 
         return this;
     }
@@ -386,6 +391,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     scrollToTop (element, callback) {
+        this.isScrollingToTop = true;
         if (element.scrollTop !== 0) {
             setTimeout(() => {
                 element.scrollTop = Math.max(element.scrollTop - 50, 0);
@@ -393,7 +399,10 @@ class Sprinkhaan extends EventEmitter {
             }, 1000 / 60);
         }
         else {
-            callback();
+            this.isScrollingToTop = false;
+            if (typeof callback === 'function') {
+                callback();
+            }
         }
     }
 
