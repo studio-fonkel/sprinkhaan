@@ -3,21 +3,6 @@ import 'web-animations/web-animations-next.min';
 import ZingTouch from 'zingtouch';
 import SprinkhaanAnimation from './SprinkhaanAnimation.js';
 
-function debounce(func, wait, immediate) {
-    var timeout;
-    return function() {
-        var context = this, args = arguments;
-        var later = function() {
-            timeout = null;
-            if (!immediate) func.apply(context, args);
-        };
-        var callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) func.apply(context, args);
-    };
-};
-
 class Sprinkhaan extends EventEmitter {
 
     prefix = '.sprinkhaan-';
@@ -123,8 +108,8 @@ class Sprinkhaan extends EventEmitter {
         // In some cases zingTouch gives a tap via a mouse click and a touchdown event.
         // For example when you debug via chrome with mobile simulator.
         // Hence the debounce.
-        this.touchRegion.bind(this.elements['close-button'], 'tap', debounce(() => this.collapse()), 40);
-        this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', debounce(() => this.expand()), 40);
+        this.touchRegion.bind(this.elements['close-button'], 'tap', this.debounce(() => this.collapse()), 40);
+        this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', this.debounce(() => this.expand()), 40);
         this.touchRegion.bind(this.element, 'pan', (event) => this.pan(event));
 
         // These handlers need unbind, see destroy().
@@ -424,6 +409,21 @@ class Sprinkhaan extends EventEmitter {
             }
         }
     }
+
+    debounce(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    };
 
 }
 
