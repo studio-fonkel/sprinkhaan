@@ -336,10 +336,10 @@ class Sprinkhaan extends EventEmitter {
             return this;
         }
 
-        this.scrollToTop(this.elements['inner'], () => {
-            this.touchRegion.preventDefault = true;
-            this.state = 'collapsed';
+        this.touchRegion.preventDefault = true;
+        this.state = 'collapsed';
 
+        this.scrollToTop(this.elements['inner'], () => {
             this.animations.popup.once('finished', () => {
                 this.emit('collapsed');
                 if (typeof callback === 'function') {
