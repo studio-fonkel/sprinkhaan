@@ -148,7 +148,6 @@ class Sprinkhaan extends EventEmitter {
     }
 
     pan (event) {
-        // TODO Android tablet portrait mode has panning horizontal instead of vertical, so we need to take device orientation into account.
         // Shorter references so the code below is readable.
         let popupAnimation = this.animations.popup;
         let panDirection = event.detail.events[0].clientY <= this.panningStartY ? 'up' : 'down';
@@ -294,6 +293,7 @@ class Sprinkhaan extends EventEmitter {
             }
             return this;
         }
+
         this.isAnimating = true;
         this.touchRegion.preventDefault = false;
         this.animations.popup.play()
@@ -315,12 +315,13 @@ class Sprinkhaan extends EventEmitter {
             }
             return this;
         }
+
         this.scrollToTop(this.elements['inner'], () => {
             this.isAnimating = true;
             this.animations.popup.reverse()
             .once('finished', () => {
-                this.state = 'collapsed';
                 this.touchRegion.preventDefault = true;
+                this.state = 'collapsed';
                 this.emit('collapsed');
                 if (typeof callback === 'function') {
                     callback();
