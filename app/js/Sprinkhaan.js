@@ -59,7 +59,7 @@ class Sprinkhaan extends EventEmitter {
         this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
         this.createAnimations();
         this.attachEventListeners();
-        this.updateScrollDataAttributes();
+        this.updateDataAttributes();
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
@@ -207,7 +207,7 @@ class Sprinkhaan extends EventEmitter {
             }
         }
 
-        this.updateScrollDataAttributes();
+        this.updateDataAttributes();
     }
 
     panEnd (event) {
@@ -271,7 +271,7 @@ class Sprinkhaan extends EventEmitter {
             this.elements['inner'].scrollTop = 0;
         }
 
-        this.updateScrollDataAttributes();
+        this.updateDataAttributes();
     }
 
     mediaTap (event) {
@@ -279,19 +279,23 @@ class Sprinkhaan extends EventEmitter {
 
         if (this.elements['media-video'].paused) {
             this.elements['media-video'].play();
-            this.element.dataset.videoIsPlaying = true;
 
         }
         else {
             this.elements['media-video'].pause();
-            this.element.dataset.videoIsPlaying = false;
         }
+
+        this.updateDataAttributes();
     }
 
-    updateScrollDataAttributes () {
+    updateDataAttributes () {
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > ((this.elements['media'] ? this.elements['media'].clientHeight : 0) - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > (this.elements['media'] ? this.elements['media'].clientHeight : 0);
         this.element.dataset.mediaEnabled = this.elements['inner'].scrollTop === 0 && this.state === 'expanded' && !this.isAnimating;
+
+        if (this.elements['media-video']) {
+            this.element.dataset.videoIsPlaying = !this.elements['media-video'].paused;
+        }
     }
 
     get state () {
@@ -336,7 +340,7 @@ class Sprinkhaan extends EventEmitter {
             if (typeof callback === 'function') {
                 callback();
             }
-            this.updateScrollDataAttributes();
+            this.updateDataAttributes();
         });
 
         this.animations.popup.play();
@@ -362,7 +366,7 @@ class Sprinkhaan extends EventEmitter {
                 if (typeof callback === 'function') {
                     callback();
                 }
-                this.updateScrollDataAttributes();
+                this.updateDataAttributes();
             });
 
             this.isAnimating = true;
@@ -379,7 +383,7 @@ class Sprinkhaan extends EventEmitter {
             if (typeof callback === 'function') {
                 callback();
             }
-            this.updateScrollDataAttributes();
+            this.updateDataAttributes();
         });
 
         this.animations.teaser.play();

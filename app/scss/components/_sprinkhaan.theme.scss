@@ -102,3 +102,37 @@ html, body {
   }
 
 }
+
+.sprinkhaan-container {
+  &[data-video-is-playing="false"] {
+    .sprinkhaan-media:after {
+      opacity: 1;
+    }
+
+    .sprinkhaan-media:before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 3;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      opacity: 1;
+      border-top: 20px solid transparent;
+      border-bottom: 20px solid transparent;
+      border-left: 30px solid white;
+    }
+  }
+
+  &[data-video-is-playing="true"] {
+    .sprinkhaan-media:after {
+      opacity: 0;
+    }
+
+    .sprinkhaan-media:before {
+      opacity: 0;
+    }
+  }
+}
+

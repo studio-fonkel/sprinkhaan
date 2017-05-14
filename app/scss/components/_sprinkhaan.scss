@@ -51,6 +51,24 @@ body {overflow-y:hidden; }
     pointer-events: auto;
     user-select: none;
 
+    &:before {
+      opacity: 0;
+      transition: opacity .3s ease-in-out;
+    }
+
+    &:after {
+      display: block;
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      opacity: 0;
+      bottom: 0;
+      transition: opacity .3s ease-in-out;
+      background: rgba(black, .6);
+    }
+
     object,
     video,
     iframe,
