@@ -96,10 +96,12 @@ class Sprinkhaan extends EventEmitter {
             { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
         ]);
 
-        this.animations.popup.addKeyframeEffect(this.elements['inner'], [
-            { backgroundColor: 'rgba(0, 0, 0, 0)' },
-            { backgroundColor: 'rgba(0, 0, 0, .5)' }
-        ]);
+        if (window.outerWidth <= this.element.clientWidth) {
+            this.animations.popup.addKeyframeEffect(this.elements['inner'], [
+                { backgroundColor: 'rgba(0, 0, 0, 0)' },
+                { backgroundColor: 'rgba(0, 0, 0, .5)' }
+            ]);
+        }
 
         this.animations.popup.addKeyframeEffect(this.elements['media'], [
             { transform: 'translateY(' + (this.element.clientHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },

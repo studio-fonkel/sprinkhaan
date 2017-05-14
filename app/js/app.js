@@ -10,24 +10,24 @@ L.tileLayer('http://tilemill.studiofonkel.nl/style/{z}/{x}/{y}.png?id=tmstyle://
 }).addTo(map);
 
 let marker = L.marker([51.7373, 4.2840]).addTo(map);
-
-let blockZoom = false;
-
-sprinkhaan.on('expanded', () => {
-    blockZoom = true;
-});
-
-sprinkhaan.on('collapsed', () => {
-   setTimeout(() => {
-       blockZoom = false;
-   }, 1000)
-});
-
-map.on('zoomstart', (event) => {
-    if (blockZoom) {
-        event.preventDefault();
-    }
-});
+//
+// let blockZoom = false;
+//
+// sprinkhaan.on('expanded', () => {
+//     blockZoom = true;
+// });
+//
+// sprinkhaan.on('collapsed', () => {
+//    setTimeout(() => {
+//        blockZoom = false;
+//    }, 1000)
+// });
+//
+// map.on('zoomstart', (event) => {
+//     if (blockZoom) {
+//         event.preventDefault();
+//     }
+// });
 
 marker.on('click', () => {
     console.log(sprinkhaan.state)
