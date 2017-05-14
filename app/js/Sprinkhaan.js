@@ -108,7 +108,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     attachEventListeners () {
-        this.touchRegion = new ZingTouch.Region(document.body);
+        this.touchRegion = new ZingTouch.Region(document.body, false, false);
 
         // In some cases zingTouch gives a tap via a mouse click and a touchdown event.
         // For example when you debug via chrome with mobile simulator.
@@ -339,7 +339,7 @@ class Sprinkhaan extends EventEmitter {
         }
 
         this.state = 'expanded';
-        this.touchRegion.preventDefault = false;
+        // this.touchRegion.preventDefault = false;
         this.isAnimating = true;
         this.animations.popup.once('finished', () => {
             this.emit('expanded');
@@ -362,7 +362,7 @@ class Sprinkhaan extends EventEmitter {
             return this;
         }
 
-        this.touchRegion.preventDefault = true;
+        // this.touchRegion.preventDefault = true;
 
         this.scrollToTop(this.elements['inner'], () => {
             this.state = 'collapsed';
