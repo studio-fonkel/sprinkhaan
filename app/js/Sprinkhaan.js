@@ -55,6 +55,7 @@ class Sprinkhaan extends EventEmitter {
         this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
         this.createAnimations();
         this.attachEventListeners();
+        this.updateScrollDataAttributes();
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
@@ -198,6 +199,8 @@ class Sprinkhaan extends EventEmitter {
                 popupAnimation.currentTime = Math.max(0, popupAnimation.activeDuration - animationPosition);
             }
         }
+
+        this.updateScrollDataAttributes();
     }
 
     panEnd (event) {
@@ -260,6 +263,11 @@ class Sprinkhaan extends EventEmitter {
         if (this.isAnimating && !this.isScrollingToTop) {
             this.elements['inner'].scrollTop = 0;
         }
+
+        this.updateScrollDataAttributes();
+    }
+
+    updateScrollDataAttributes () {
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > ((this.elements['media'] ? this.elements['media'].clientHeight : 0) - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > (this.elements['media'] ? this.elements['media'].clientHeight : 0);
     }

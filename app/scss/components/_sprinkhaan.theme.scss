@@ -56,7 +56,7 @@ html, body {
   }
 }
 
-[data-pre-sticky-header="true"] {
+[data-state="expanded"][data-pre-sticky-header="true"] {
   .sprinkhaan-header.is-not-sticky {
     padding-left: 50px;
   }
