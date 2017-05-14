@@ -51,11 +51,14 @@ body {overflow-y:hidden; }
     pointer-events: auto;
     user-select: none;
 
+    object,
+    video,
     iframe,
     img {
       display: block;
       width: 100%;
       height: 100%;
+      max-width: 100vw;
       object-fit: cover;
       position: absolute;
       top: 0;
@@ -94,7 +97,6 @@ body {overflow-y:hidden; }
     pointer-events: auto;
     background: white;
     user-select: none;
-    padding-right: 40px;
   }
 }
 
@@ -131,5 +133,15 @@ body {overflow-y:hidden; }
   .sprinkhaan-header.is-not-sticky {
     opacity: 0;
     z-index: -1;
+  }
+}
+
+.sprinkhaan-container[data-media-enabled="true"] {
+  .sprinkhaan-media {
+    video,
+    iframe,
+    object {
+      pointer-events: auto;
+    }
   }
 }

@@ -52,6 +52,9 @@ class Sprinkhaan extends EventEmitter {
         });
 
         this.elements['content'].style.marginTop = this.elements['header.is-not-sticky'].clientHeight + 'px';
+        this.elements['media'].style.width = this.element.clientWidth + 'px';
+        this.elements['content'].style.width = this.element.clientWidth + 'px';
+
         this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
         this.createAnimations();
         this.attachEventListeners();
@@ -270,6 +273,7 @@ class Sprinkhaan extends EventEmitter {
     updateScrollDataAttributes () {
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > ((this.elements['media'] ? this.elements['media'].clientHeight : 0) - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > (this.elements['media'] ? this.elements['media'].clientHeight : 0);
+        this.element.dataset.mediaEnabled = this.elements['inner'].scrollTop === 0 && this.state === 'expanded' && !this.isAnimating;
     }
 
     get state () {
@@ -314,6 +318,7 @@ class Sprinkhaan extends EventEmitter {
             if (typeof callback === 'function') {
                 callback();
             }
+            this.updateScrollDataAttributes();
         });
 
         this.animations.popup.play();
@@ -338,6 +343,7 @@ class Sprinkhaan extends EventEmitter {
                 if (typeof callback === 'function') {
                     callback();
                 }
+                this.updateScrollDataAttributes();
             });
 
             this.isAnimating = true;
@@ -354,6 +360,7 @@ class Sprinkhaan extends EventEmitter {
             if (typeof callback === 'function') {
                 callback();
             }
+            this.updateScrollDataAttributes();
         });
 
         this.animations.teaser.play();
