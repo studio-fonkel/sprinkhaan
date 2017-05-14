@@ -17,7 +17,8 @@ class Sprinkhaan extends EventEmitter {
         'content': false,
         'media': false,
         'inner': false,
-        'close-button': false
+        'close-button': false,
+        'media-video': false
     };
 
     speed = 300;
@@ -115,6 +116,9 @@ class Sprinkhaan extends EventEmitter {
         this.touchRegion.bind(this.elements['close-button'], 'tap', this.debounce(() => this.collapse()), 40);
         this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', this.debounce(() => this.expand()), 40);
         this.touchRegion.bind(this.element, 'pan', (event) => this.pan(event));
+        if (this.elements['media-video']) {
+            this.touchRegion.bind(this.elements['media-video'], 'tap', this.debounce((event) => this.mediaTap(event)), 40);
+        }
 
         // These handlers need unbind, see destroy().
         this.boundEvents = {
@@ -268,6 +272,17 @@ class Sprinkhaan extends EventEmitter {
         }
 
         this.updateScrollDataAttributes();
+    }
+
+    mediaTap (event) {
+        if (event.detail.events[0].originalEvent instanceof TouchEvent) { return; }
+
+        if (this.elements['media-video'].paused) {
+            this.elements['media-video'].play();
+        }
+        else {
+            this.elements['media-video'].pause();
+        }
     }
 
     updateScrollDataAttributes () {
@@ -426,21 +441,6 @@ class Sprinkhaan extends EventEmitter {
         }
     }
 
-    debounce (func, wait, immediate) {
-        let timeout;
-        return function() {
-            let context = this, args = arguments;
-            let later = function() {
-                timeout = null;
-                if (!immediate) func.apply(context, args);
-            };
-            let callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) func.apply(context, args);
-        };
-    }
-
     getSprinkhaanParentOfElement (element) {
         let sprinkhaanElement = false;
 
@@ -459,6 +459,22 @@ class Sprinkhaan extends EventEmitter {
 
         return sprinkhaanElement;
     }
+
+    debounce (func, wait, immediate) {
+        let timeout;
+        return function() {
+            let context = this, args = arguments;
+            let later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            let callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    }
+
 }
 
 export default Sprinkhaan;
