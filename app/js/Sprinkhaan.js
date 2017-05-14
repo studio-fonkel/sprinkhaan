@@ -148,7 +148,7 @@ class Sprinkhaan extends EventEmitter {
     panStart (event) {
         this.isPanning = true;
         this.animations.popup.pause();
-        this.panningStartTarget = event.detail.events[0].originalEvent.target;
+        this.panningStartTarget = this.getSprinkhaanParentOfElement(event.detail.events[0].originalEvent.target);
         this.panningStartY = event.detail.events[0].clientY;
     }
 
@@ -418,7 +418,7 @@ class Sprinkhaan extends EventEmitter {
         }
     }
 
-    debounce(func, wait, immediate) {
+    debounce (func, wait, immediate) {
         let timeout;
         return function() {
             let context = this, args = arguments;
@@ -431,8 +431,26 @@ class Sprinkhaan extends EventEmitter {
             timeout = setTimeout(later, wait);
             if (callNow) func.apply(context, args);
         };
-    };
+    }
 
+    getSprinkhaanParentOfElement (element) {
+        let sprinkhaanElement = false;
+
+        let sprinkhaanElements = [];
+        Object.keys(this.elements).forEach((className) => {
+            sprinkhaanElements.push(this.elements[className]);
+        });
+
+        while (element) {
+            if (!sprinkhaanElement && sprinkhaanElements.includes(element)) {
+                sprinkhaanElement = element;
+            }
+
+            element = element.parentNode;
+        }
+
+        return sprinkhaanElement;
+    }
 }
 
 export default Sprinkhaan;

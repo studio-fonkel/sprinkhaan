@@ -96,11 +96,11 @@ body {overflow-y:hidden; }
     user-select: none;
     padding-right: 40px;
 
-    // TODO maybe this could be done with javascript instead of css.
-    // We could check in the pan function if this.panningStartTarget has a parent this is in this.elements.
-    > * {
-      pointer-events: none;
-    }
+    //// TODO maybe this could be done with javascript instead of css.
+    //// We could check in the pan function if this.panningStartTarget has a parent this is in this.elements.
+    //> * {
+    //  pointer-events: none;
+    //}
   }
 }
 
