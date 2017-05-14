@@ -279,9 +279,12 @@ class Sprinkhaan extends EventEmitter {
 
         if (this.elements['media-video'].paused) {
             this.elements['media-video'].play();
+            this.element.dataset.videoIsPlaying = true;
+
         }
         else {
             this.elements['media-video'].pause();
+            this.element.dataset.videoIsPlaying = false;
         }
     }
 
