@@ -310,9 +310,9 @@ class Sprinkhaan extends EventEmitter {
             return this;
         }
 
-        this.isAnimating = true;
         this.state = 'expanded';
         this.touchRegion.preventDefault = false;
+        this.isAnimating = true;
         this.animations.popup.once('finished', () => {
             this.emit('expanded');
             if (typeof callback === 'function') {
@@ -335,9 +335,10 @@ class Sprinkhaan extends EventEmitter {
         }
 
         this.touchRegion.preventDefault = true;
-        this.state = 'collapsed';
 
         this.scrollToTop(this.elements['inner'], () => {
+            this.state = 'collapsed';
+
             this.animations.popup.once('finished', () => {
                 this.emit('collapsed');
                 if (typeof callback === 'function') {

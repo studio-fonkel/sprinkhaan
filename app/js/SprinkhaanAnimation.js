@@ -38,6 +38,8 @@ class SprinkhaanAnimation extends EventEmitter {
 
     reverse () {
         this.animations.forEach((animation) => {
+            animation.pause();
+            animation._animation.currentTime = 299;
             animation.reverse();
         });
 
