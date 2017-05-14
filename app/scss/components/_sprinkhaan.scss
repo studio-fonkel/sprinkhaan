@@ -36,6 +36,7 @@ body {overflow-y:hidden; }
     height: 100%;
     width: calc(100% + 20px);
     pointer-events: none;
+    background-color: rgba(0, 0, 0, 0);
 
     &::-webkit-scrollbar {
       display: none;
