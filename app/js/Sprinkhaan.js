@@ -52,7 +52,7 @@ class Sprinkhaan extends EventEmitter {
         });
 
         this.elements['content'].style.marginTop = this.elements['header.is-not-sticky'].clientHeight + 'px';
-        this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + this.elements['media'].clientHeight) + 'px';
+        this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
         this.createAnimations();
         this.attachEventListeners();
     }
@@ -98,7 +98,7 @@ class Sprinkhaan extends EventEmitter {
 
         this.animations.popup.addKeyframeEffect(this.elements['content-wrapper'], [
             { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
-            { transform: 'translateY(' + this.elements['media'].clientHeight + 'px) translateY(0)' }
+            { transform: 'translateY(' + (this.elements['media'] ? this.elements['media'].clientHeight : 0) + 'px) translateY(0)' }
         ]);
     }
 
@@ -168,7 +168,7 @@ class Sprinkhaan extends EventEmitter {
 
         let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
 
-        let msPerPx = popupAnimation.activeDuration / (this.element.clientHeight - els['media'].offsetHeight - els['header.is-not-sticky'].offsetHeight);
+        let msPerPx = popupAnimation.activeDuration / (this.element.clientHeight - (els['media'] ? els['media'].offsetHeight : 0) - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
         // Panning up, dragging the header.
@@ -260,8 +260,8 @@ class Sprinkhaan extends EventEmitter {
         if (this.isAnimating && !this.isScrollingToTop) {
             this.elements['inner'].scrollTop = 0;
         }
-        this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > (this.elements['media'].clientHeight - 50);
-        this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > this.elements['media'].clientHeight;
+        this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > ((this.elements['media'] ? this.elements['media'].clientHeight : 0) - 50);
+        this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > (this.elements['media'] ? this.elements['media'].clientHeight : 0);
     }
 
     get state () {
