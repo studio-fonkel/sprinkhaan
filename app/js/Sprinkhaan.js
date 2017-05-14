@@ -153,9 +153,12 @@ class Sprinkhaan extends EventEmitter {
     }
 
     panStart (event) {
+        this.panningStartTarget = this.getSprinkhaanParentOfElement(event.detail.events[0].originalEvent.target);
+
+        if (!this.panningStartTarget) { return; }
+
         this.isPanning = true;
         this.animations.popup.pause();
-        this.panningStartTarget = this.getSprinkhaanParentOfElement(event.detail.events[0].originalEvent.target);
         this.panningStartY = event.detail.events[0].clientY;
     }
 
@@ -173,6 +176,8 @@ class Sprinkhaan extends EventEmitter {
         }
 
         if (!this.isPanning) { this.panStart(event); }
+
+        if (!this.panningStartTarget) { return; }
 
         let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
 
@@ -213,6 +218,7 @@ class Sprinkhaan extends EventEmitter {
     panEnd (event) {
         // It skips the following line and collapses when scrolling in the content.
         if (!this.isPanning) { return; }
+        if (!this.panningStartTarget) { return; }
 
         let clientY = (event.clientY !== undefined) ? event.clientY : event.changedTouches[0].clientY;
         let panDirection = (clientY < this.panningStartY) ? 'up' : 'down';

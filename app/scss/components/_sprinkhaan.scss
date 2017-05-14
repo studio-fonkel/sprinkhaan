@@ -50,6 +50,7 @@ body {overflow-y:hidden; }
     padding-bottom: 57%;
     pointer-events: auto;
     user-select: none;
+    cursor: pointer;
 
     &:before {
       opacity: 0;
