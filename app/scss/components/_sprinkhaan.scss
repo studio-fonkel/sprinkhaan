@@ -45,6 +45,7 @@ body {overflow-y:hidden; }
 
   .sprinkhaan-media {
     width: 100%;
+    background-color: black;
     transform: translateY(9999px); // Moves it initially off screen, js fixes afterwards.
     left: 0;
     position: relative;
@@ -52,6 +53,7 @@ body {overflow-y:hidden; }
     pointer-events: auto;
     user-select: none;
     cursor: pointer;
+    overflow: hidden;
 
     &:before {
       opacity: 0;
@@ -79,13 +81,13 @@ body {overflow-y:hidden; }
       width: 100%;
       height: 100%;
       max-width: 100vw;
-      object-fit: cover;
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: none;
+      pointer-events: none !important;
       bottom: 0;
       right: 0;
+      user-select: none;
     }
   }
 
@@ -156,11 +158,8 @@ body {overflow-y:hidden; }
   }
 }
 
-.sprinkhaan-container[data-media-enabled="true"] {
-  .sprinkhaan-media {
-    iframe,
-    object {
-      pointer-events: auto;
-    }
+.sprinkhaan-container[data-media-enabled="false"] {
+  .sprinkhaan-media-youtube {
+    display: none;
   }
 }

@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import 'web-animations/web-animations-next.min';
 import ZingTouch from 'zingtouch';
 import SprinkhaanAnimation from './SprinkhaanAnimation.js';
+import './CallPlayer.js';
 
 class Sprinkhaan extends EventEmitter {
 
@@ -18,7 +19,8 @@ class Sprinkhaan extends EventEmitter {
         'media': false,
         'inner': false,
         'close-button': false,
-        'media-video': false
+        'media-video': false,
+        'media-youtube': false
     };
 
     speed = 300;
@@ -60,6 +62,10 @@ class Sprinkhaan extends EventEmitter {
         this.createAnimations();
         this.attachEventListeners();
         this.updateDataAttributes();
+
+        if (this.elements['media-youtube']) {
+            this.elements['media-youtube'].id = 'sprinkhaan-youtube';
+        }
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
@@ -124,7 +130,11 @@ class Sprinkhaan extends EventEmitter {
         this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', this.debounce(() => this.expand()), 40);
         this.touchRegion.bind(this.element, 'pan', (event) => this.pan(event));
         if (this.elements['media-video']) {
-            this.touchRegion.bind(this.elements['media-video'], 'tap', this.debounce((event) => this.mediaTap(event)), 40);
+            this.touchRegion.bind(this.elements['media-video'], 'tap', this.debounce((event) => this.mediaVideoTap(event)), 40);
+        }
+
+        if (this.elements['media-youtube']) {
+            this.touchRegion.bind(this.elements['media-youtube'], 'tap', this.debounce((event) => this.mediaYoutubeTap(event)), 40);
         }
 
         // These handlers need unbind, see destroy().
@@ -287,7 +297,7 @@ class Sprinkhaan extends EventEmitter {
         this.updateDataAttributes();
     }
 
-    mediaTap (event) {
+    mediaVideoTap (event) {
         if (event.detail.events[0].originalEvent instanceof TouchEvent) { return; }
 
         if (this.elements['media-video'].paused) {
@@ -299,6 +309,25 @@ class Sprinkhaan extends EventEmitter {
         }
 
         this.updateDataAttributes();
+    }
+
+    mediaYoutubeTap (event) {
+        if (!this.youtubeIsPlaying) {
+            this.playYoutube();
+        }
+        else {
+            this.pauseYoutube();
+        }
+    }
+
+    playYoutube () {
+        this.youtubeIsPlaying = true;
+        callPlayer('sprinkhaan-youtube', 'playVideo');
+    }
+
+    pauseYoutube() {
+        this.youtubeIsPlaying = false;
+        callPlayer('sprinkhaan-youtube', 'pauseVideo');
     }
 
     updateDataAttributes () {

@@ -30,8 +30,6 @@ let marker = L.marker([51.7373, 4.2840]).addTo(map);
 // });
 
 marker.on('click', () => {
-    console.log(sprinkhaan.state)
-
     if (sprinkhaan.state === 'collapsed') {
         sprinkhaan.hide();
     }
