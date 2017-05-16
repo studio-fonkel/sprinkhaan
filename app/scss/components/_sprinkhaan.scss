@@ -53,7 +53,6 @@ body {overflow-y:hidden; }
     pointer-events: auto;
     user-select: none;
     cursor: pointer;
-    overflow: hidden;
 
     &:before {
       opacity: 0;
@@ -159,7 +158,7 @@ body {overflow-y:hidden; }
 }
 
 .sprinkhaan-container[data-media-enabled="false"] {
-  .sprinkhaan-media-youtube {
-    display: none;
-  }
+  //.sprinkhaan-media-youtube {
+  //  display: none;
+  //}
 }

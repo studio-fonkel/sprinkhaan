@@ -110,7 +110,7 @@ class Sprinkhaan extends EventEmitter {
         }
 
         this.animations.popup.addKeyframeEffect(this.elements['media'], [
-            { transform: 'translateY(' + (this.element.clientHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
+            { transform: 'translateY(' + (this.element.clientHeight - (this.elements['media-youtube'] ? 0 : this.elements['header.is-not-sticky'].clientHeight)) + 'px)' },
             { transform: 'translateY(0)' }
         ]);
 
