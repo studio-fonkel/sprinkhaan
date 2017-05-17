@@ -76,6 +76,7 @@ body {overflow-y:hidden; }
 
     object,
     video,
+    a,
     iframe,
     img {
       display: block;
@@ -85,10 +86,16 @@ body {overflow-y:hidden; }
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: auto !important;
       bottom: 0;
       right: 0;
       user-select: none;
+    }
+
+    object,
+    video,
+    iframe,
+    img {
+      pointer-events: none !important;
     }
   }
 

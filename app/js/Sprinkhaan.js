@@ -66,7 +66,8 @@ class Sprinkhaan extends EventEmitter {
         if (this.elements['media'] && this.elements['media'].dataset.youtube) {
             this.youtube = new SprinkhaanYoutube({
                 youtubeId: this.elements['media'].dataset.youtube,
-                element: this.elements['media']
+                element: this.elements['media'],
+                touchRegion: this.touchRegion,
             });
         }
 
