@@ -8,7 +8,7 @@ class Sprinkhaan extends EventEmitter {
 
     prefix = '.sprinkhaan-';
     easing = 'cubic-bezier(.61,.14,.5,.93)';
-
+    iOs = false;
     selector = '#sprinkhaan';
     element = false;
     elements = {
@@ -47,6 +47,7 @@ class Sprinkhaan extends EventEmitter {
 
         this.element = document.querySelector(this.selector);
         if (!this.element) { throw 'Sprinkhaan needs a valid element to function'; }
+        this.iOs = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         Object.keys(this.elements).forEach((subElement) => {
             this.elements[subElement] = this.element.querySelector(this.prefix + subElement);
@@ -67,7 +68,7 @@ class Sprinkhaan extends EventEmitter {
             this.youtube = new SprinkhaanYoutube({
                 youtubeId: this.elements['media'].dataset.youtube,
                 element: this.elements['media'],
-                touchRegion: this.touchRegion,
+                sprinkhaan: this,
             });
         }
 
@@ -129,7 +130,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     attachEventListeners () {
-        this.touchRegion = new ZingTouch.Region(document.body, false, false);
+        this.touchRegion = new ZingTouch.Region(document.body, false, this.iOs);
 
         // In some cases zingTouch gives a tap via a mouse click and a touchdown event.
         // For example when you debug via chrome with mobile simulator.

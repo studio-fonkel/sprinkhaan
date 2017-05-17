@@ -6,17 +6,16 @@ class SprinkhaanYoutube extends EventEmitter {
     element = null;
     thumbnail = null;
     iOsLink = null;
-    iOs = false;
+    sprinkhaan = false;
 
     constructor (options) {
         super();
         Object.assign(this, options);
-        this.iOs = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         this.thumbnail = document.createElement('img');
         this.thumbnail.src = `//img.youtube.com/vi/${this.youtubeId}/maxresdefault.jpg`;
 
-        if (this.iOs) {
+        if (this.sprinkhaan.iOs) {
             this.iOsLink = document.createElement('a');
             this.iOsLink.href = `//youtube.com/v/${this.youtubeId}`;
             this.iOsLink.appendChild(this.thumbnail);
@@ -24,9 +23,9 @@ class SprinkhaanYoutube extends EventEmitter {
         } else {
             this.element.appendChild(this.thumbnail);
 
-            this.touchRegion.bind(this.element, 'tap', (event) => {
-
-            });
+            // this.touchRegion.bind(this.element, 'tap', (event) => {
+            //
+            // });
         }
     }
 
