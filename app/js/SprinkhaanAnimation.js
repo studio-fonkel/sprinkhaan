@@ -12,8 +12,9 @@ class SprinkhaanAnimation extends EventEmitter {
         this.animationOptions = animationOptions;
     }
 
-    addKeyframeEffect (element, frames) {
-        let keyframeEffect = new KeyframeEffect(element, frames, this.animationOptions);
+    addKeyframeEffect (element, frames, options = {}) {
+        let currentOptions = Object.assign(this.animationOptions, options);
+        let keyframeEffect = new KeyframeEffect(element, frames, currentOptions);
         let animation = new Animation(keyframeEffect, document.timeline);
 
         animation.onfinish = () => {
