@@ -256,7 +256,7 @@ class Sprinkhaan extends EventEmitter {
             if (percentageDone > this.threshold) {
                 this.expand();
             }
-            else {
+            else if (percentageDone !== 0) {
                 this.collapse();
             }
         }
