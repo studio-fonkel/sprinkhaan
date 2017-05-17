@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import 'web-animations/web-animations-next.min';
 import ZingTouch from 'zingtouch';
 import SprinkhaanAnimation from './SprinkhaanAnimation.js';
-import './CallPlayer.js';
+import SprinkhaanYoutube from './SprinkhaanYoutube.js';
 
 class Sprinkhaan extends EventEmitter {
 
@@ -18,9 +18,7 @@ class Sprinkhaan extends EventEmitter {
         'content': false,
         'media': false,
         'inner': false,
-        'close-button': false,
-        'media-video': false,
-        'media-youtube': false
+        'close-button': false
     };
 
     speed = 300;
@@ -55,7 +53,9 @@ class Sprinkhaan extends EventEmitter {
         });
 
         this.elements['content'].style.marginTop = this.elements['header.is-not-sticky'].clientHeight + 'px';
-        this.elements['media'].style.width = this.element.clientWidth + 'px';
+        if (this.elements['media']) {
+            this.elements['media'].style.width = this.element.clientWidth + 'px';
+        }
         this.elements['content'].style.width = this.element.clientWidth + 'px';
 
         this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
@@ -63,9 +63,14 @@ class Sprinkhaan extends EventEmitter {
         this.attachEventListeners();
         this.updateDataAttributes();
 
-        if (this.elements['media-youtube']) {
-            this.elements['media-youtube'].id = 'sprinkhaan-youtube';
+        if (this.elements['media'] && this.elements['media'].dataset.youtube) {
+            this.youtube = new SprinkhaanYoutube({
+                youtubeId: this.elements['media'].dataset.youtube,
+                element: this.elements['media']
+            });
         }
+
+
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
@@ -110,7 +115,9 @@ class Sprinkhaan extends EventEmitter {
         }
 
         this.animations.popup.addKeyframeEffect(this.elements['media'], [
-            { transform: 'translateY(' + (this.element.clientHeight - (this.elements['media-youtube'] ? 0 : this.elements['header.is-not-sticky'].clientHeight)) + 'px)' },
+            { transform: 'translateY(' + (this.element.clientHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
+            // youtube android fix:
+            // { transform: 'translateY(' + (this.element.clientHeight - (this.elements['media-youtube'] ? 0 : this.elements['header.is-not-sticky'].clientHeight)) + 'px)' },
             { transform: 'translateY(0)' }
         ]);
 
@@ -129,13 +136,6 @@ class Sprinkhaan extends EventEmitter {
         this.touchRegion.bind(this.elements['close-button'], 'tap', this.debounce(() => this.collapse()), 40);
         this.touchRegion.bind(this.elements['header.is-not-sticky'], 'tap', this.debounce(() => this.expand()), 40);
         this.touchRegion.bind(this.element, 'pan', (event) => this.pan(event));
-        if (this.elements['media-video']) {
-            this.touchRegion.bind(this.elements['media-video'], 'tap', this.debounce((event) => this.mediaVideoTap(event)), 40);
-        }
-
-        if (this.elements['media-youtube']) {
-            this.touchRegion.bind(this.elements['media-youtube'], 'tap', this.debounce((event) => this.mediaYoutubeTap(event)), 40);
-        }
 
         // These handlers need unbind, see destroy().
         this.boundEvents = {
@@ -233,7 +233,6 @@ class Sprinkhaan extends EventEmitter {
     }
 
     panEnd (event) {
-        // It skips the following line and collapses when scrolling in the content.
         if (!this.isPanning) { return; }
         if (!this.panningStartTarget) { return; }
 
@@ -297,47 +296,10 @@ class Sprinkhaan extends EventEmitter {
         this.updateDataAttributes();
     }
 
-    mediaVideoTap (event) {
-        if (event.detail.events[0].originalEvent instanceof TouchEvent) { return; }
-
-        if (this.elements['media-video'].paused) {
-            this.elements['media-video'].play();
-
-        }
-        else {
-            this.elements['media-video'].pause();
-        }
-
-        this.updateDataAttributes();
-    }
-
-    mediaYoutubeTap (event) {
-        if (!this.youtubeIsPlaying) {
-            this.playYoutube();
-        }
-        else {
-            this.pauseYoutube();
-        }
-    }
-
-    playYoutube () {
-        this.youtubeIsPlaying = true;
-        callPlayer('sprinkhaan-youtube', 'playVideo');
-    }
-
-    pauseYoutube() {
-        this.youtubeIsPlaying = false;
-        callPlayer('sprinkhaan-youtube', 'pauseVideo');
-    }
-
     updateDataAttributes () {
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > ((this.elements['media'] ? this.elements['media'].clientHeight : 0) - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > (this.elements['media'] ? this.elements['media'].clientHeight : 0);
         this.element.dataset.mediaEnabled = this.elements['inner'].scrollTop === 0 && this.state === 'expanded' && !this.isAnimating;
-
-        if (this.elements['media-video']) {
-            this.element.dataset.videoIsPlaying = !this.elements['media-video'].paused;
-        }
     }
 
     get state () {

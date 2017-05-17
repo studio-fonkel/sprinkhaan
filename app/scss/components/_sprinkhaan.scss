@@ -57,12 +57,14 @@ body {overflow-y:hidden; }
     &:before {
       opacity: 0;
       transition: opacity .3s ease-in-out;
+      pointer-events: none;
     }
 
     &:after {
       display: block;
       content: '';
       position: absolute;
+      pointer-events: none;
       top: 0;
       left: 0;
       right: 0;
@@ -83,7 +85,7 @@ body {overflow-y:hidden; }
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: none !important;
+      pointer-events: auto !important;
       bottom: 0;
       right: 0;
       user-select: none;
