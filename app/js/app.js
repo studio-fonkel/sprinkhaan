@@ -3,7 +3,8 @@ import Sprinkhaan from './Sprinkhaan.js';
 let sprinkhaan = new Sprinkhaan();
 
 let map = L.map('map', {
-    attributionControl: false
+    attributionControl: false,
+    zoomControl: false
 }).setView([51.7373, 4.2840], 14);
 L.tileLayer('http://tilemill.studiofonkel.nl/style/{z}/{x}/{y}.png?id=tmstyle:///home/administrator/styles/haringvliet-2017.tm2&j2oul3e6', {
     detectRetina: true
@@ -28,6 +29,8 @@ let marker = L.marker([51.7373, 4.2840]).addTo(map);
 //         event.preventDefault();
 //     }
 // });
+
+window.sprinkhaan = sprinkhaan;
 
 marker.on('click', () => {
     if (sprinkhaan.state === 'collapsed') {

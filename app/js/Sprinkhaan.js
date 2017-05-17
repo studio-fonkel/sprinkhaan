@@ -112,9 +112,14 @@ class Sprinkhaan extends EventEmitter {
         if (window.outerWidth <= this.element.clientWidth) {
             this.animations.popup.addKeyframeEffect(this.elements['inner'], [
                 { backgroundColor: 'rgba(0, 0, 0, 0)' },
-                { backgroundColor: 'rgba(0, 0, 0, .5)' }
+                { backgroundColor: 'rgba(0, 0, 0, .8)' }
             ]);
         }
+
+        this.animations.popup.addKeyframeEffect(this.elements['media'], [
+            { opacity: '.5' },
+            { opacity: '1' }
+        ]);
 
         this.animations.popup.addKeyframeEffect(this.elements['media'], [
             { transform: 'translateY(' + (this.element.clientHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)' },
@@ -130,7 +135,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     attachEventListeners () {
-        this.touchRegion = new ZingTouch.Region(document.body, false, this.iOs);
+        this.touchRegion = new ZingTouch.Region(document.body, false, false);
 
         // In some cases zingTouch gives a tap via a mouse click and a touchdown event.
         // For example when you debug via chrome with mobile simulator.
@@ -185,8 +190,16 @@ class Sprinkhaan extends EventEmitter {
         // Shorter references so the code below is readable.
         let popupAnimation = this.animations.popup;
         let panDirection = event.detail.events[0].clientY <= this.panningStartY ? 'up' : 'down';
-
         let els = this.elements;
+
+        if (this.iOs) {
+            if (this.isPanning && this.state === 'expanded' && els['inner'].scrollTop === 0 && panDirection === 'down' ||
+                this.state === 'collapsed') {
+                console.log('canceled');
+                (event.detail.events).forEach( _e => _e.originalEvent.preventDefault());
+            }
+        }
+
         if (this.isAnimating || els['inner'].scrollTop !== 0) { return; }
 
         // Switching from expanding/collapsing to scrolling in the popup.
@@ -345,6 +358,7 @@ class Sprinkhaan extends EventEmitter {
             if (typeof callback === 'function') {
                 callback();
             }
+
             this.updateDataAttributes();
         });
 
@@ -369,6 +383,7 @@ class Sprinkhaan extends EventEmitter {
                 if (typeof callback === 'function') {
                     callback();
                 }
+
                 this.updateDataAttributes();
             });
 

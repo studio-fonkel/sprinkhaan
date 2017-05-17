@@ -16,7 +16,7 @@ body {overflow-y:hidden; }
   z-index: 1000;
   pointer-events: none;
   overflow: hidden;
-  -webkit-overflow-scrolling: touch;
+  //-webkit-overflow-scrolling: touch;
 
   .sprinkhaan-close-button {
     position: absolute;
