@@ -23,6 +23,7 @@ class Sprinkhaan extends EventEmitter {
 
     speed = 300;
     threshold = 30;
+    panDirection = 'down';
 
     animations = {
         teaser: {},
@@ -34,6 +35,7 @@ class Sprinkhaan extends EventEmitter {
     touchRegion = undefined;
     panningStartTarget = false;
     panningStartY = false;
+    isScrolling = false;
 
     properties = {
         state: 'hidden',
@@ -188,44 +190,31 @@ class Sprinkhaan extends EventEmitter {
     pan (event) {
         // Shorter references so the code below is readable.
         let popupAnimation = this.animations.popup;
-        let panDirection = event.detail.events[0].clientY <= this.panningStartY ? 'up' : 'down';
+        this.panDirection = (event.detail.data[0].currentDirection >= 0 && event.detail.data[0].currentDirection <= 180) ? 'up' : 'down';
         let els = this.elements;
 
         if (this.iOs) {
-            if (this.isPanning && this.state === 'expanded' && els['inner'].scrollTop === 0 && panDirection === 'down' ||
+            if (this.isPanning && this.state === 'expanded' && els['inner'].scrollTop === 0 && this.panDirection === 'down' ||
                 this.state === 'collapsed') {
-                console.log('canceled');
                 (event.detail.events).forEach( _e => _e.originalEvent.preventDefault());
             }
         }
 
-        if (this.isAnimating || els['inner'].scrollTop !== 0) { return; }
-
-        // Switching from expanding/collapsing to scrolling in the popup.
-        if (panDirection === 'up' && els['inner'].scrollTop === 0 && this.state === 'expanded') {
-            return;
-        }
-
+        if (this.isAnimating) { return; }
         if (!this.isPanning) { this.panStart(event); }
-
         if (!this.panningStartTarget) { return; }
 
         let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
-
         let msPerPx = popupAnimation.activeDuration / (this.element.clientHeight - (els['media'] ? els['media'].offsetHeight : 0) - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
-        // Panning up, dragging the header.
-        if (this.state === 'collapsed' && this.panningStartTarget === els['header.is-not-sticky'] && panDirection === 'up') {
+        if (this.state === 'collapsed' && this.panningStartTarget === els['header.is-not-sticky']) {
             // If you pan the popup up and you let it stop at 100% the web animation starts to play again.
             // So we want it to stop at 99.9% or the current position.
             popupAnimation.currentTime = Math.min(popupAnimation.activeDuration - .1, animationPosition);
         }
 
-        // Panning down.
-        if (this.state === 'expanded' && els['inner'].scrollTop === 0 && panDirection === 'down' &&
-            [els['content'], els['header.is-not-sticky'], els['media']].includes(this.panningStartTarget)
-        ) {
+        if (this.state === 'expanded' && [els['content'], els['header.is-not-sticky'], els['media']].includes(this.panningStartTarget)) {
             // Animating where the user drag the media element
             if (this.panningStartTarget === els['media']) {
                 // We need to recalculate these items for the media animation.
@@ -237,7 +226,7 @@ class Sprinkhaan extends EventEmitter {
             }
 
             // Animating where the user drag the header or the content element
-            if ([els['content'], els['header.is-not-sticky']].includes(this.panningStartTarget)) {
+            if ([els['content'], els['header.is-not-sticky']].includes(this.panningStartTarget) && els['inner'].scrollTop === 0) {
                 // We want the animation to start at 0 not before it.
                 popupAnimation.currentTime = Math.max(0, popupAnimation.activeDuration - animationPosition);
             }
@@ -250,14 +239,12 @@ class Sprinkhaan extends EventEmitter {
         if (!this.isPanning) { return; }
         if (!this.panningStartTarget) { return; }
 
-        let clientY = (event.clientY !== undefined) ? event.clientY : event.changedTouches[0].clientY;
-        let panDirection = (clientY < this.panningStartY) ? 'up' : 'down';
         this.panningStartY = false;
         let percentageDone = Math.round(100 / this.animations.popup.activeDuration * this.animations.popup.currentTime);
 
         // No need to react.
-        if (percentageDone === 100 && this.state === 'expanded' && panDirection === 'up' ||
-            percentageDone === 100 && this.state === 'expanded' && panDirection === 'down'
+        if (percentageDone === 100 && this.state === 'expanded' && this.panDirection === 'up' ||
+            percentageDone === 100 && this.state === 'expanded' && this.panDirection === 'down'
         ) {
             this.isPanning = false;
             return;
@@ -314,6 +301,7 @@ class Sprinkhaan extends EventEmitter {
         this.element.dataset.preStickyHeader = this.elements['inner'].scrollTop > ((this.elements['media'] ? this.elements['media'].clientHeight : 0) - 50);
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > (this.elements['media'] ? this.elements['media'].clientHeight : 0);
         this.element.dataset.mediaEnabled = this.elements['inner'].scrollTop === 0 && this.state === 'expanded' && !this.isAnimating;
+        this.element.dataset.isPanning = this.isPanning;
     }
 
     get state () {

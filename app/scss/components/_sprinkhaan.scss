@@ -31,7 +31,7 @@ body {overflow-y:hidden; }
 
   .sprinkhaan-inner {
     position: relative;
-    overflow-y: scroll;
+    overflow-y: hidden;
     overflow-x: hidden;
     height: 100%;
     width: calc(100% + 20px);

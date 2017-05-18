@@ -6,7 +6,7 @@ let map = L.map('map', {
     attributionControl: false,
     zoomControl: false
 }).setView([51.7373, 4.2840], 14);
-L.tileLayer('http://tilemill.studiofonkel.nl/style/{z}/{x}/{y}.png?id=tmstyle:///home/administrator/styles/haringvliet-2017.tm2&j2oul3e6', {
+L.tileLayer('http://tilemill.studiofonkel.nl/style/{z}/{x}/{y}.png?id=tmstyle:///home/administrator/styles/haringvliet/base.tm2&j2oul3e6', {
     detectRetina: true
 }).addTo(map);
 
