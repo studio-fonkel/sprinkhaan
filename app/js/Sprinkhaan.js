@@ -395,30 +395,49 @@ class Sprinkhaan extends EventEmitter {
     }
 
     show (callback) {
-        this.animations.teaser.once('finished', () => {
+        let finished = () => {
             this.state = 'collapsed';
             this.emit('collapsed');
             if (typeof callback === 'function') {
                 callback();
             }
             this.updateDataAttributes();
-        });
+        };
 
-        this.animations.teaser.play();
+        if (this.state !== 'hidden') {
+            finished();
+        }
+        else {
+            this.animations.teaser.once('finished', () => {
+                finished();
+            });
+
+            this.animations.teaser.play();
+        }
 
         return this;
     }
 
     hide (callback) {
-        this.animations.teaser.once('finished', () => {
+        let finished = () => {
             this.emit('hidden');
             this.state = 'hidden';
             if (typeof callback === 'function') {
                 callback();
             }
-        });
+            this.updateDataAttributes();
+        };
 
-        this.animations.teaser.reverse();
+        if (this.state !== 'collapsed') {
+            finished();
+        }
+        else {
+            this.animations.teaser.once('finished', () => {
+                finished();
+            });
+
+            this.animations.teaser.reverse();
+        }
 
         return this;
     }
