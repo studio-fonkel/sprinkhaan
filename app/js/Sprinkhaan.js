@@ -200,35 +200,43 @@ class Sprinkhaan extends EventEmitter {
             }
         }
 
+        if (this.resetPanningStartY) {
+            this.resetPanningStartY = false;
+            this.panningStartY = event.detail.events[0].clientY;
+        }
+
         if (this.isAnimating) { return; }
         if (!this.isPanning) { this.panStart(event); }
         if (!this.panningStartTarget) { return; }
 
-        let offset = Math.abs(event.detail.events[0].clientY - this.panningStartY);
+        let offset = event.detail.events[0].clientY - this.panningStartY;
         let msPerPx = popupAnimation.activeDuration / (this.element.clientHeight - (els['media'] ? els['media'].offsetHeight : 0) - els['header.is-not-sticky'].offsetHeight);
         let animationPosition = offset * msPerPx;
 
         if (this.state === 'collapsed' && this.panningStartTarget === els['header.is-not-sticky']) {
+            let animationPosition = Math.max(0 - offset, 0) * msPerPx;
+
             // If you pan the popup up and you let it stop at 100% the web animation starts to play again.
             // So we want it to stop at 99.9% or the current position.
             popupAnimation.currentTime = Math.min(popupAnimation.activeDuration - .1, animationPosition);
         }
 
-        if (this.state === 'expanded' && [els['content'], els['header.is-not-sticky'], els['media']].includes(this.panningStartTarget)) {
+        if (this.state === 'expanded' && [els['content'], els['header.is-not-sticky'], els['media']].includes(this.panningStartTarget) && els['inner'].scrollTop === 0) {
+
             // Animating where the user drag the media element
             if (this.panningStartTarget === els['media']) {
                 // We need to recalculate these items for the media animation.
-                let msPerPx = popupAnimation.activeDuration / (this.element.clientHeight - els['header.is-not-sticky'].offsetHeight);
-                let animationPosition = offset * msPerPx;
+                msPerPx = popupAnimation.activeDuration / (this.element.clientHeight - els['header.is-not-sticky'].offsetHeight);
+                animationPosition = offset * msPerPx;
 
                 // We want the animation to start at 0 not before it.
-                popupAnimation.currentTime = Math.max(0, popupAnimation.activeDuration - animationPosition);
+                popupAnimation.currentTime = Math.min(Math.max(0, popupAnimation.activeDuration - animationPosition), 300);
             }
 
             // Animating where the user drag the header or the content element
-            if ([els['content'], els['header.is-not-sticky']].includes(this.panningStartTarget) && els['inner'].scrollTop === 0) {
+            if ([els['content'], els['header.is-not-sticky']].includes(this.panningStartTarget)) {
                 // We want the animation to start at 0 not before it.
-                popupAnimation.currentTime = Math.max(0, popupAnimation.activeDuration - animationPosition);
+                popupAnimation.currentTime = Math.min(Math.max(0, popupAnimation.activeDuration - animationPosition), 300);
             }
         }
 
@@ -289,11 +297,16 @@ class Sprinkhaan extends EventEmitter {
         }
     }
 
-    elementScroll () {
+    elementScroll (event) {
         if (this.isAnimating && !this.isScrollingToTop) {
             this.elements['inner'].scrollTop = 0;
         }
 
+        if (this.elements['inner'].scrollTop === 0 && this.previousScrollTop !== 0) {
+            this.resetPanningStartY = true;
+        }
+
+        this.previousScrollTop = this.elements['inner'].scrollTop;
         this.updateDataAttributes();
     }
 
