@@ -171,7 +171,7 @@ class Sprinkhaan extends EventEmitter {
         }
 
         if (this.state === 'expanded') {
-            this.animations.popup.currentTime = 300;
+            this.animations.popup.currentTime = this.speed;
         }
 
         this.createAnimations();
@@ -230,13 +230,13 @@ class Sprinkhaan extends EventEmitter {
                 animationPosition = offset * msPerPx;
 
                 // We want the animation to start at 0 not before it.
-                popupAnimation.currentTime = Math.min(Math.max(0, popupAnimation.activeDuration - animationPosition), 300);
+                popupAnimation.currentTime = Math.min(Math.max(0, popupAnimation.activeDuration - animationPosition), this.speed);
             }
 
             // Animating where the user drag the header or the content element
             if ([els['content'], els['header.is-not-sticky']].includes(this.panningStartTarget)) {
                 // We want the animation to start at 0 not before it.
-                popupAnimation.currentTime = Math.min(Math.max(0, popupAnimation.activeDuration - animationPosition), 300);
+                popupAnimation.currentTime = Math.min(Math.max(0, popupAnimation.activeDuration - animationPosition), this.speed);
             }
         }
 
