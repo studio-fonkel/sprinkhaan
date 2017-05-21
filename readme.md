@@ -113,3 +113,58 @@ sprinkhaan.destroy(() => {
     $('#sprinkhaan').remove();
 })
 ```
+
+### .on() & .once()
+
+Sprinkhaan emits events.
+
+* expanded
+* hidden
+* collapsed
+* destroyed
+
+You can subscribe to it like this:
+
+```
+sprinkhaan.on('expanded', () => {
+    // Called everytime the sprinkhaan is expanded.
+})
+
+sprinkhaan.on('hidden', () => {
+    // Called everytime the sprinkhaan is hidden.
+})
+
+sprinkhaan.on('collapsed', () => {
+    // Called everytime the sprinkhaan is collapsed.
+})
+
+sprinkhaan.on('destroyed', () => {
+    // Called once the sprinkhaan is destroyed.
+})
+```
+
+The difference between on() & once() is that the once method is only used once. After calling it, it will detach itself.
+
+### Youtube support
+
+If you use the following markup for the media element, a youtube video is rendered.
+
+```
+<div class="sprinkhaan-media" data-youtube="ayjN3Kdc7OA"></div>
+```
+
+On iOs a thumbnail is placed, on all other system you can play the video inside the Sprinkhaan. If you click on the thumbnail, the youtube app is opened.
+
+### HTML5 video tag support
+
+This is something that we want to support.
+
+### Installation
+
+```
+jspm install github:studio-fonkel/sprinkhaan
+```
+
+### Tests
+
+There are no tests at this moment. We would like to test via browserstack so we can guarantee that iOs is still working.
