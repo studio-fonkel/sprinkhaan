@@ -4,7 +4,7 @@ An ES6 library to create a popover for use with maps on mobile devices. Sprinkha
 
 Example:
 
-[![Sprinkhaan Example](https://img.youtube.com/vi/yJDuHduoRE4/0.jpg)](https://www.youtube.com/watch?v=yJDuHduoRE4) 
+[![Sprinkhaan Example](https://raw.githubusercontent.com/studio-fonkel/sprinkhaan/master/sprinkhaan.gif)](https://www.youtube.com/watch?v=yJDuHduoRE4) 
 
 * Uses the [web animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)
 
