@@ -161,9 +161,9 @@ This is something that we want to support.
 
 ### Installation
 
-```
-jspm install github:studio-fonkel/sprinkhaan
-```
+* jspm install github:studio-fonkel/sprinkhaan
+* Copy the sass files from app/scss/ and include them in your project
+* Import the es6 file Sprinkhaan.js
 
 ### Tests
 
