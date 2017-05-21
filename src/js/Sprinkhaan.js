@@ -168,6 +168,7 @@ class Sprinkhaan extends EventEmitter {
     resizeWindow () {
         this.animations.popup.pause();
 
+        // TODO add state hidden.
         if (this.state === 'collapsed') {
             this.animations.popup.currentTime = 0;
         }
