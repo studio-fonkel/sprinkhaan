@@ -8,8 +8,11 @@ class Sprinkhaan extends EventEmitter {
 
     prefix = '.sprinkhaan-';
     easing = 'cubic-bezier(.61,.14,.5,.93)';
-    iOs = false;
     selector = '#sprinkhaan';
+    speed = 300;
+    threshold = 30;
+
+    iOs = false;
     element = false;
     elements = {
         'content-wrapper': false,
@@ -21,8 +24,6 @@ class Sprinkhaan extends EventEmitter {
         'close-button': false
     };
 
-    speed = 300;
-    threshold = 30;
     panDirection = 'down';
 
     animations = {
@@ -35,7 +36,6 @@ class Sprinkhaan extends EventEmitter {
     touchRegion = undefined;
     panningStartTarget = false;
     panningStartY = false;
-    isScrolling = false;
 
     properties = {
         state: 'hidden',
