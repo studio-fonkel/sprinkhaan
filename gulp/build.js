@@ -5,23 +5,23 @@ var exec = require('child_process').exec;
 
 gulp.task('build', ['css'], function () {
 
-    exec('jspm bundle app/js/app.js dist/build.js --minify', function (err, stdout, stderr) {
+    exec('jspm bundle src/js/app.js dist/build.js --minify', function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
     });
 
-    gulp.src('./app/*.html')
+    gulp.src('./src/*.html')
     .pipe(gulp.dest('./dist'));
 
-    gulp.src('./app/jspm.config.js')
+    gulp.src('./src/jspm.config.js')
     .pipe(gulp.dest('./dist'));
 
-    gulp.src(['./app/es6-shim.js', './app/shims_for_IE.js'])
+    gulp.src(['./src/es6-shim.js', './src/shims_for_IE.js'])
     .pipe(gulp.dest('./dist'));
 
 
-    gulp.src('./app/lib/*')
+    gulp.src('./src/lib/*')
     .pipe(gulp.dest('./dist/lib'));
-    gulp.src('./app/css/*')
+    gulp.src('./src/css/*')
     .pipe(gulp.dest('./dist/css'));
 });

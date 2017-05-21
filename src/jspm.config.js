@@ -36,7 +36,8 @@ SystemJS.config({
   map: {
     "babel": "npm:babel-core@5.8.38",
     "web-animations": "github:web-animations/web-animations-js@2.2.5",
-    "zingtouch": "github:zingchart/zingtouch@1.0.5"
+    "zingtouch": "github:zingchart/zingtouch@1.0.5",
+    "studio-fonkel/Sprinkhaan": "js/Sprinkhaan.js"
   }
 });
 

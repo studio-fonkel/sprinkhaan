@@ -59,7 +59,9 @@ class Sprinkhaan extends EventEmitter {
         if (this.elements['media']) {
             this.elements['media'].style.width = this.element.clientWidth + 'px';
         }
-        this.elements['content'].style.width = this.element.clientWidth + 'px';
+        this.elements['content-wrapper'].style.width = this.element.clientWidth + 'px';
+        this.elements['header.is-not-sticky'].style.width = this.element.clientWidth + 'px';
+        this.elements['header.is-sticky'].style.width = this.element.clientWidth + 'px';
 
         this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
         this.createAnimations();
