@@ -66,7 +66,10 @@ class Sprinkhaan extends EventEmitter {
         this.elements['header.is-not-sticky'].style.width = this.element.clientWidth + 'px';
         this.elements['header.is-sticky'].style.width = this.element.clientWidth + 'px';
 
-        this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
+        if (window.innerWidth > this.element.clientWidth) {
+            this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
+        }
+
         this.createAnimations();
         this.attachEventListeners();
         this.updateDataAttributes();
@@ -116,7 +119,7 @@ class Sprinkhaan extends EventEmitter {
             { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' }
         ]);
 
-        if (window.outerWidth <= this.element.clientWidth) {
+        if (window.innerWidth <= this.element.clientWidth) {
             this.animations.popup.addKeyframeEffect(this.elements['inner'], [
                 { backgroundColor: 'rgba(0, 0, 0, 0)' },
                 { backgroundColor: 'rgba(0, 0, 0, .8)' }
