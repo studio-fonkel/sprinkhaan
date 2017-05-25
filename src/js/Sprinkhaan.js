@@ -69,6 +69,9 @@ class Sprinkhaan extends EventEmitter {
         if (window.innerWidth > this.element.clientWidth) {
             this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
         }
+        else {
+            this.elements['content'].style.minHeight = (window.innerHeight - (this.elements['media'] ? this.elements['media'].clientHeight : 0) - this.elements['header.is-sticky'].clientHeight) + 'px';
+        }
 
         this.createAnimations();
         this.attachEventListeners();

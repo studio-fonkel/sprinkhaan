@@ -134,18 +134,6 @@ body {overflow-y:hidden; }
     user-select: none;
     padding: 15px;
     position: relative;
-
-    &:after {
-      background-color: white;
-      position: absolute;
-      content: '';
-      display: block;
-      width: 100%;
-      z-index: -1;
-      top: 0;
-      left: 0;
-      height: 100vh;
-    }
   }
 }
 
