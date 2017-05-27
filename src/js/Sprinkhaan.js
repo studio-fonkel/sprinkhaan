@@ -129,10 +129,12 @@ class Sprinkhaan extends EventEmitter {
             ]);
         }
 
+        /*
         this.animations.popup.addKeyframeEffect(this.elements['media'], [
             { opacity: '.5' },
             { opacity: '1' }
         ]);
+        */
 
         this.animations.popup.addKeyframeEffect(this.elements['media'], [
             { transform: 'translateY(' + (this.element.clientHeight) + 'px)' },
