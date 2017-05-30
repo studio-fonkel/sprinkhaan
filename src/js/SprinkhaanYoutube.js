@@ -28,11 +28,17 @@ class SprinkhaanYoutube extends EventEmitter {
 
             this.element.removeChild(this.thumbnail);
             this.iframe = document.createElement('iframe');
-            this.iframe.src = `//www.youtube.com/embed/${this.youtubeId}?enablejsapi=1&wmode=opaque&controls=0`;
-            this.iframe.setAttribute('frameborder', 0);
+            this.iframe.src = `//www.youtube.com/embed/${this.youtubeId}?enablejsapi=1&wmode=opaque&controls=0&rel=0&showinfo=0&modestbranding=0`;
             this.iframe.setAttribute('allowfullscreen', 'allowfullscreen');
             this.iframe.setAttribute('scrolling', 'no');
-            this.iframe.setAttribute('autoplay', 'yes');
+            this.iframe.setAttribute('frameborder', 0);
+            this.iframe.setAttribute('autoplay', 1);
+            this.iframe.setAttribute('modestbranding', 1);
+            this.iframe.setAttribute('autohide', 1);
+            this.iframe.setAttribute('showinfo', 0);
+            this.iframe.setAttribute('controls', 0);
+            this.iframe.setAttribute('rel', 0);
+
             this.iframe.id = `sprinkhaan-${this.youtubeId}`;
 
             this.element.appendChild(this.iframe);
