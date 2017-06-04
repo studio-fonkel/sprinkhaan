@@ -129,12 +129,11 @@ class Sprinkhaan extends EventEmitter {
             ]);
         }
 
-        /*
-        this.animations.popup.addKeyframeEffect(this.elements['media'], [
-            { opacity: '.5' },
-            { opacity: '1' }
+        this.animations.popup.addKeyframeEffect(this.elements['close-button'], [
+            { opacity: '0', transform: 'translateY(200px)' },
+            { opacity: '0', transform: 'translateY(200px)', offset: 0.7 },
+            { opacity: '1', transform: 'translateY(0)' }
         ]);
-        */
 
         this.animations.popup.addKeyframeEffect(this.elements['media'], [
             { transform: 'translateY(' + (this.element.clientHeight) + 'px)' },
@@ -146,6 +145,8 @@ class Sprinkhaan extends EventEmitter {
             { transform: 'translateY(' + this.element.clientHeight + 'px) translateY(-' + this.elements['header.is-not-sticky'].clientHeight + 'px)' },
             { transform: 'translateY(' + (this.elements['media'] ? this.elements['media'].clientHeight : 0) + 'px) translateY(0)' }
         ]);
+
+        this.emit('animationsCreated', this.animations);
     }
 
     attachEventListeners () {
@@ -467,12 +468,11 @@ class Sprinkhaan extends EventEmitter {
         document.body.removeEventListener('mouseup', this.boundEvents.mouseup);
         this.elements['inner'].removeEventListener('scroll', this.boundEvents.scroll);
         window.removeEventListener('wheel', this.boundEvents.wheel);
-
-        this.emit('destroyed');
     }
 
     destroy (callback) {
         this.detachEventListeners();
+        this.emit('destroyed');
 
         this.collapse(() => {
             this.hide(() => {
