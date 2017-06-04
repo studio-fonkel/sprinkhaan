@@ -220,7 +220,6 @@ class Sprinkhaan extends EventEmitter {
             this.panningStartY = event.detail.events[0].clientY;
         }
 
-        if (this.isAnimating) { return; }
         if (!this.isPanning) { this.panStart(event); }
         if (!this.panningStartTarget) { return; }
 
@@ -253,6 +252,10 @@ class Sprinkhaan extends EventEmitter {
                 // We want the animation to start at 0 not before it.
                 popupAnimation.currentTime = Math.min(Math.max(0, popupAnimation.activeDuration - animationPosition), this.speed);
             }
+        }
+
+        if (this.animations.popup.currentTime > 0 && this.animations.popup.currentTime < this.speed) {
+            this.isAnimating = true;
         }
 
         this.updateDataAttributes();
@@ -313,10 +316,6 @@ class Sprinkhaan extends EventEmitter {
     }
 
     elementScroll (event) {
-        if (this.isAnimating && !this.isScrollingToTop) {
-            this.elements['inner'].scrollTop = 0;
-        }
-
         if (this.elements['inner'].scrollTop === 0 && this.previousScrollTop !== 0) {
             this.resetPanningStartY = true;
         }
@@ -330,6 +329,7 @@ class Sprinkhaan extends EventEmitter {
         this.element.dataset.stickyHeader = this.elements['inner'].scrollTop > (this.elements['media'] ? this.elements['media'].clientHeight : 0);
         this.element.dataset.mediaEnabled = this.elements['inner'].scrollTop === 0 && this.state === 'expanded' && !this.isAnimating;
         this.element.dataset.isPanning = this.isPanning;
+        this.element.dataset.animating = this.isAnimating;
     }
 
     get state () {
@@ -359,7 +359,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     expand (callback) {
-        if (this.isAnimating || this.state === 'expanded' && !this.isPanning) {
+        if (this.state === 'expanded' && !this.isPanning) {
             if (typeof callback === 'function') {
                 callback();
             }
@@ -383,7 +383,7 @@ class Sprinkhaan extends EventEmitter {
     }
 
     collapse (callback) {
-        if (this.isAnimating || this.state !== 'expanded' && !this.isPanning) {
+        if (this.state !== 'expanded' && !this.isPanning) {
             if (typeof callback === 'function') {
                 callback();
             }

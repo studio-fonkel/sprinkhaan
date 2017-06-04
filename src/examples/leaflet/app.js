@@ -2,6 +2,13 @@ import Sprinkhaan from 'studio-fonkel/Sprinkhaan';
 
 let sprinkhaan = new Sprinkhaan();
 
+sprinkhaan.on('animationsCreated', (animations) => {
+    animations.popup.addKeyframeEffect(sprinkhaan.elements['header.is-not-sticky'], [
+        { paddingLeft: '30px' },
+        { paddingLeft: '90px' }
+    ]);
+});
+
 let map = L.map('map', {
     attributionControl: false,
     zoomControl: false

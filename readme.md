@@ -128,6 +128,7 @@ Sprinkhaan emits the following events:
 * expanded
 * hidden
 * collapsed
+* animationsCreated
 * destroyed
 
 You can subscribe to them:
@@ -143,6 +144,19 @@ sprinkhaan.on('hidden', () => {
 
 sprinkhaan.on('collapsed', () => {
     // Called everytime the sprinkhaan is collapsed.
+})
+
+sprinkhaan.on('animationsCreated', (animations) => {
+    // Called once the sprinkhaan created animations.
+    // You can use this to add animations to the sprinkhaan.
+    // You can choose between animations.teaser which is the initial show of the title and
+    // animations.popup which is the expanding animation.
+    
+    // Here we add left padding to the header when it is expanding.
+    animations.popup.addKeyframeEffect(sprinkhaan.elements['header.is-not-sticky'], [
+        { paddingLeft: '30px' },
+        { paddingLeft: '90px' }
+    ]);
 })
 
 sprinkhaan.on('destroyed', () => {
