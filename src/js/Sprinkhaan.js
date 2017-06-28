@@ -14,6 +14,7 @@ class Sprinkhaan extends EventEmitter {
     selector = '#sprinkhaan';
     speed = 300;
     threshold = 30;
+    scrollWheelEnabled = true;
 
     iOs = false;
     element = false;
@@ -58,21 +59,7 @@ class Sprinkhaan extends EventEmitter {
             this.elements[subElement] = this.element.querySelector(this.prefix + subElement);
         });
 
-        this.elements['content'].style.marginTop = this.elements['header.is-not-sticky'].clientHeight + 'px';
-        if (this.elements['media']) {
-            this.elements['media'].style.width = this.element.clientWidth + 'px';
-        }
-        this.elements['content-wrapper'].style.width = this.element.clientWidth + 'px';
-        this.elements['header.is-not-sticky'].style.width = this.element.clientWidth + 'px';
-        this.elements['header.is-sticky'].style.width = this.element.clientWidth + 'px';
-
-        if (window.innerWidth > this.element.clientWidth) {
-            this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
-        }
-        else {
-            this.elements['content'].style.minHeight = (window.innerHeight - (this.elements['media'] ? this.elements['media'].clientHeight : 0) - this.elements['header.is-sticky'].clientHeight) + 'px';
-        }
-
+        this.setCss();
         this.createAnimations();
         this.attachEventListeners();
         this.updateDataAttributes();
@@ -84,8 +71,32 @@ class Sprinkhaan extends EventEmitter {
                 sprinkhaan: this,
             });
         }
+    }
 
+    setCss () {
+        this.elements['content'].style.marginTop = this.elements['header.is-not-sticky'].clientHeight + 'px';
+        if (this.elements['media']) {
+            this.elements['media'].style.width = this.element.clientWidth + 'px';
+        }
+        this.elements['content-wrapper'].style.width = this.element.clientWidth + 'px';
+        this.elements['header.is-not-sticky'].style.width = this.element.clientWidth + 'px';
+        this.elements['header.is-sticky'].style.width = this.element.clientWidth + 'px';
 
+        if (window.innerWidth > this.element.clientWidth) {
+            this.element.style.height = '';
+            this.elements['content'].style.minHeight = '';
+
+            setTimeout(() => {
+                this.element.style.height = Math.min(this.element.clientHeight, this.elements['content-wrapper'].clientHeight + (this.elements['media'] ? this.elements['media'].clientHeight : 0)) + 'px';
+            });
+        }
+        else {
+            this.element.style.height = '';
+            this.elements['content'].style.minHeight = '';
+            setTimeout(() => {
+                this.elements['content'].style.minHeight = (window.innerHeight - (this.elements['media'] ? this.elements['media'].clientHeight : 0) - this.elements['header.is-sticky'].clientHeight) + 'px';
+            });
+        }
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
@@ -130,8 +141,9 @@ class Sprinkhaan extends EventEmitter {
         }
 
         this.animations.popup.addKeyframeEffect(this.elements['close-button'], [
-            { opacity: '0', transform: 'translateY(200px)' },
-            { opacity: '0', transform: 'translateY(200px)', offset: 0.7 },
+            { opacity: '0', transform: 'translateY(' + (this.element.clientHeight) + 'px)' },
+            { transform: 'translateY(' + (this.element.clientHeight - this.elements['header.is-not-sticky'].clientHeight) + 'px)', offset: 0.01 },
+            { opacity: '0', offset: 0.4 },
             { opacity: '1', transform: 'translateY(0)' }
         ]);
 
@@ -169,27 +181,35 @@ class Sprinkhaan extends EventEmitter {
             wheel: (event) => this.wheelScroll(event),
         };
 
+        if (this.scrollWheelEnabled) {
+            window.addEventListener('wheel', this.boundEvents.wheel, { passive: true });
+        }
+
         window.addEventListener('resize', this.boundEvents.resize);
         window.addEventListener('orientationchange', this.boundEvents.orientationchange);
         document.body.addEventListener('touchend', this.boundEvents.touchend);
         document.body.addEventListener('mouseup', this.boundEvents.mouseup);
         this.elements['inner'].addEventListener('scroll', this.boundEvents.scroll);
-        window.addEventListener('wheel', this.boundEvents.wheel, { passive: true });
     }
 
     resizeWindow () {
-        this.animations.popup.pause();
+        if (this.state === 'hidden') {
+            this.animations.teaser.pause();
+            this.animations.teaser.currentTime = 0;
+        }
 
-        // TODO add state hidden.
         if (this.state === 'collapsed') {
+            this.animations.popup.pause();
             this.animations.popup.currentTime = 0;
         }
 
         if (this.state === 'expanded') {
+            this.animations.popup.pause();
             this.animations.popup.currentTime = this.speed;
         }
 
         this.createAnimations();
+        this.setCss();
     }
 
     panStart (event) {

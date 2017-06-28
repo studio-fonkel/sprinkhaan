@@ -1,10 +1,12 @@
 import Sprinkhaan from 'studio-fonkel/Sprinkhaan';
 
-let sprinkhaan = new Sprinkhaan();
+let sprinkhaan = new Sprinkhaan({
+    scrollWheelEnabled: false
+});
 
 sprinkhaan.on('animationsCreated', (animations) => {
     animations.popup.addKeyframeEffect(sprinkhaan.elements['header.is-not-sticky'], [
-        { paddingLeft: '30px' },
+        { paddingLeft: '15px' },
         { paddingLeft: '90px' }
     ]);
 });
@@ -19,7 +21,6 @@ L.tileLayer('http://tilemill.studiofonkel.nl/style/{z}/{x}/{y}.png?id=tmstyle://
 }).addTo(map);
 
 map.on('click', () => {
-    console.log(sprinkhaan.state)
     if (sprinkhaan.state === 'collapsed') {
         sprinkhaan.hide()
     }

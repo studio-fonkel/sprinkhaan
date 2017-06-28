@@ -27,8 +27,8 @@ body {overflow-y:hidden; }
     cursor: pointer;
     width: 40px;
     height: 40px;
+    z-index: 2;
     opacity: 0;
-    z-index: -1;
 
     &:before, &:after {
       position: absolute;
