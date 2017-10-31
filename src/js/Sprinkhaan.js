@@ -5,7 +5,7 @@ import SprinkhaanAnimation from './SprinkhaanAnimation.js';
 import SprinkhaanYoutube from './SprinkhaanYoutube.js';
 
 import './shims_for_IE.js';
-import './es6-shim.js'
+// import './es6-shim.js'
 
 class Sprinkhaan extends EventEmitter {
 
