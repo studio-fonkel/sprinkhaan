@@ -20,7 +20,7 @@ class SprinkhaanYoutube extends EventEmitter {
 
         if (this.sprinkhaan.iOs) {
             this.iOsLink = document.createElement('a');
-            this.iOsLink.href = `//youtube.com/v/${this.youtubeId}`;
+            this.iOsLink.href = `//youtube.com/watch?v=${this.youtubeId}`;
             this.iOsLink.appendChild(this.thumbnail);
             this.element.appendChild(this.iOsLink);
         } else {
