@@ -2,6 +2,5 @@ node_modules
 .idea
 .DS_STORE
 src/css
-src/lib
 .tmp
 yarn.lock
