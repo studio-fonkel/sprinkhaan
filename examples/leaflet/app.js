@@ -1,4 +1,4 @@
-import Sprinkhaan from 'studio-fonkel/Sprinkhaan';
+import Sprinkhaan from './../../src/js/Sprinkhaan.js';
 
 let sprinkhaan = new Sprinkhaan({
     scrollWheelEnabled: false
