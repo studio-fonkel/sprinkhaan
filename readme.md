@@ -14,7 +14,7 @@ An ES6 library to create a mobile-popover (commonly used on maps). Sprinkhaan is
 
 ```
 // Import the library:
-import Sprinkhaan from 'studio-fonkel/Sprinkhaan';
+import Sprinkhaan from './lib/sprinkhaan/Sprinkhaan.js';
 
 // Create a new instance
 let sprinkhaan = new Sprinkhaan();
@@ -182,7 +182,7 @@ This is something we want to support in the future.
 
 ## Installation
 
-* `jspm install github:studio-fonkel/sprinkhaan`
+* Download this repo and put the src folder somewhere in your codebase.
 * Copy the sass files from `app/scss/` and include them in your project
 * Import the es6 file `Sprinkhaan.js`
 
